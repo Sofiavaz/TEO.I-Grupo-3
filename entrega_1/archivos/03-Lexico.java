@@ -22,7 +22,7 @@ public class Lexico implements java_cup.runtime.Scanner {
   /** This character denotes the end of file. */
   public static final int YYEOF = -1;
 
-  /** Initial size of the lookahead buffer. */
+  
   private static final int ZZ_BUFFERSIZE = 16384;
 
   // Lexical states.
