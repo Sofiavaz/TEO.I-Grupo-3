@@ -15,7 +15,6 @@ import compilador.TablaSimbolos.*;
 import java_cup.runtime.*;
 
 
-// See https://github.com/jflex-de/jflex/issues/222
 @SuppressWarnings("FallThrough")
 public class Lexico implements java_cup.runtime.Scanner {
 
