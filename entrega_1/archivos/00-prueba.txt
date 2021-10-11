@@ -36,13 +36,4 @@ Else{
 	PRINT "no es mayor que 2"
 }
 
-
-</ TAKE Grupo 2, eliminar si no es tu tema especial />
-
-contador = TAKE (+  ; 2  ;   [2 ; 12 ; 24 ; 48] )
-var = 56 - TAKE (/    ; 4  ;   [ ] )
-
-</ --------------</----------------/>---------------- />
-
-
 END.PROGRAM
