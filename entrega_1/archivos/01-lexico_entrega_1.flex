@@ -26,12 +26,12 @@ import java_cup.runtime.*;
 
 	// Valores maximos
 	private final int STR_MAX_LEN = 30;
-	/* 2¹⁶ */
+	/* 2Â¹â�¶ */
 	private final int INT_MAX_LEN = 65536;	
-	/* 2³² */
+	/* 2Â³Â² */
 	private final float FLOAT_MAX_LEN = 0;
 	
-	// Tabla de símbolos
+	// Tabla de sÃ­mbolos
 	private List<Map<Columna, String>> symtbl;
 	
 	
@@ -85,7 +85,7 @@ import java_cup.runtime.*;
 	
 	// Verifica la cantidad de bits del integer (0-65535) (recibido como string)
 	public boolean checkInt(String s){
-		// Verifico que s no este vacia o tenga más de 5 digitos
+		// Verifico que s no este vacia o tenga mÃ¡s de 5 digitos
 		if (s.isEmpty() || s.length() > 5){
 			return false;
 		}
