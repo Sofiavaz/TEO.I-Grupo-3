@@ -1,26 +1,16 @@
 package modelo;
 
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import vista.Vista;
+
+import javax.swing.*;
+
 
 public class Main {
 	public static void main(String[] args) {
-		FileReader reader;
-		
-		try {
-			// Carga el archivo de texto prueba.txt.
-			reader = new FileReader("txt/prueba.txt");
-			
-			// Realiza el análisis lexicográfico.
-			Lexico lexer = new Lexico(reader);
-			lexer.yylex();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
+		JFrame frame = new JFrame ("Vista");
+		frame.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().add (new Vista());
+		frame.pack();
+		frame.setVisible (true);
 	}
 }

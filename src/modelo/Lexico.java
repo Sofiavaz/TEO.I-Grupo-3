@@ -8,6 +8,7 @@
 
 package modelo;
 import jflex.core.sym; // Necesario para el método next_token(). 
+import vista.Vista;
 /*
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -424,7 +425,7 @@ public class Lexico {
 	// Valores máximos.
 	private final int STR_MAX_LEN = 32;  // Son 32 porque contamos las doble comillas de apertura y cierre.
 	private final int INT_MAX_LEN = 65536;
-	
+	private Vista vista;
 	// Tabla de símbolos.
 	// private List<Map<Columna, String>> symtbl;
 	
@@ -481,7 +482,9 @@ public class Lexico {
 		}
 	}
 	*/
-	
+	public void agregarVista(Vista actual){
+      vista= actual;
+    }
 	// Verifica la cantidad de bits del entero recibido como String.
 	public boolean checkInt(String s) {
 	
@@ -501,8 +504,8 @@ public class Lexico {
 			}
 			
 		} catch(Exception e) {
-			System.out.println("Error parseando lexema " + yytext() + ".");
-			System.out.println(e.toString());
+			vista.agregarLinea("Error parseando lexema " + yytext() + ".");
+			vista.agregarLinea(e.toString());
 			return false;
 		}
 		
@@ -522,7 +525,7 @@ public class Lexico {
 			// Convierto a float. Si se convierte, el valor está dentro
 			// de los valores aceptables para el tipo float de Java.
 			float numero = Float.valueOf(s);
-			System.out.println(numero);
+			vista.agregarLinea(numero);
 			
 			if(
 				numero == Float.POSITIVE_INFINITY
@@ -533,8 +536,8 @@ public class Lexico {
 			) return false;  
 			
 		} catch(Exception e) {
-			System.out.println("Error parseando lexema " + yytext() + ".");
-			System.out.println(e.toString());
+			vista.agregarLinea("Error parseando lexema " + yytext() + ".");
+			vista.agregarLinea(e.toString());
 			return false;
 		}
 		
@@ -552,8 +555,8 @@ public class Lexico {
 	
 	// Imprime cada par token:lexema hallado.
 	public void anuncio(String token) {
-		System.out.println("*** Nuevo hallazgo ***");
-		System.out.println("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");
+		vista.agregarLinea("*** Nuevo hallazgo ***");
+		vista.agregarLinea("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");
 		//EscribeAnalisis.escribir("*** Nuevo hallazgo ***", true);
 		//EscribeAnalisis.escribir("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n", true);
 	}
@@ -999,7 +1002,7 @@ public class Lexico {
           case 10:
             { anuncio("CONST_INT");					
 								if (!checkInt(yytext())) {
-									System.out.println("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
+									vista.agregarLinea("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
 								} else {
 									//addSym("_" + yytext(), "CONST_INT", yytext(), null);
 								}
@@ -1049,7 +1052,7 @@ public class Lexico {
           case 19:
             { anuncio("CONST_STR");
 								if (!checkStr(yytext())) {
-									System.out.println("Lexema " + yytext() + " excede la longitud máxima de un String (" + STR_MAX_LEN + ").\n");		
+									vista.agregarLinea("Lexema " + yytext() + " excede la longitud máxima de un String (" + STR_MAX_LEN + ").\n");		
 								} else {
 									//addSym("_" + yytext(), "CONST_STR", yytext(), yytext().length());
 								}
@@ -1064,7 +1067,7 @@ public class Lexico {
           case 21:
             { anuncio("CONST_FLOAT");
 								if (!checkFloat(yytext())) {
-									System.out.println("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
+									vista.agregarLinea("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
 								} else {
 									//addSym("_" + yytext(), "CONST_FLOAT", yytext(), null);
 								}
