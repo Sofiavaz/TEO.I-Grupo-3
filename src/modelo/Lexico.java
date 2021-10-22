@@ -8,24 +8,15 @@
 
 package modelo;
 import jflex.core.sym; // Necesario para el método next_token(). 
-import vista.Vista;
-/*
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-*/
-
-// Para escribir el archivo de la tabla de símbolos.
-//import compilador.TablaSimbolos.*;
+import vista.Vista;
 
 
 /* ------------------------------------------------------------------ */
 
 // See https://github.com/jflex-de/jflex/issues/222
 @SuppressWarnings("FallThrough")
-public class Lexico {
+public class Lexico implements java_cup.runtime.Scanner {
 
   /** This character denotes the end of file. */
   public static final int YYEOF = -1;
@@ -418,75 +409,20 @@ public class Lexico {
   private boolean zzAtBOL = true;
 
   /** Whether the user-EOF-code has already been executed. */
-  @SuppressWarnings("unused")
   private boolean zzEOFDone;
 
   /* user code: */
 	// Valores máximos.
 	private final int STR_MAX_LEN = 32;  // Son 32 porque contamos las doble comillas de apertura y cierre.
 	private final int INT_MAX_LEN = 65536;
+	private ArrayList<Token> listaTokens = new ArrayList<Token>();
 	private Vista vista;
+	
 	// Tabla de símbolos.
 	// private List<Map<Columna, String>> symtbl;
 	
-	// Inicializa la tabla de símbolos.
-	/*
-	private void iniTable() {
-		TablaSimbolos.escribirArchivo(null, null, false);
-		this.symtbl = TablaSimbolos.leerArchivo(null);
-		EscribeAnalisis.escribir("", false);
-	}
-	*/
-
-	/*
-	// Agrega un símbolo de ID de variable.
-	public void addSym(String nombre, String token, String tipo) {
-		boolean encontrado = false;
-		int i = 0;
-		
-		while (!encontrado && i < symtbl.size()) {
-			encontrado = symtbl.get(i).get(Columna.NOMBRE).equals(nombre);
-			i++;
-		}
-		
-		if (!encontrado) {
-			Map<Columna, String> sym = new HashMap<Columna, String>();
-			sym.put(Columna.NOMBRE, nombre);
-			sym.put(Columna.TOKEN, token);
-			sym.put(Columna.TIPO, tipo);
-			this.symtbl.add(sym);
-			TablaSimbolos.escribirArchivo(Arrays.asList(sym), null, true);
-		}
-	}
-	*/
-	
-	/*
-	// Agrega una constante.
-	public void addSym(String nombre, String token, String valor, Integer len) {
-		boolean encontrado = false;
-		int i = 0;
-		
-		while (!encontrado && i < symtbl.size()) {
-			encontrado = symtbl.get(i).get(Columna.NOMBRE).equals(nombre);
-			i++;
-		}
-		
-		if (!encontrado) {
-			Map<Columna,String> sym = new HashMap<Columna, String>();
-			sym.put(Columna.NOMBRE, nombre);
-			sym.put(Columna.TOKEN, token);
-			sym.put(Columna.VALOR, valor);
-			if (len != null) sym.put(Columna.LEN, String.valueOf(len));
-			this.symtbl.add(sym);
-			TablaSimbolos.escribirArchivo(Arrays.asList(sym), null, true);
-		}
-	}
-	*/
-	public void agregarVista(Vista actual){
-      vista= actual;
-    }
 	// Verifica la cantidad de bits del entero recibido como String.
-	public boolean checkInt(String s) {
+	private boolean checkInt(String s) {
 	
 		// Verifico que s no esté vacía, o tenga más de 5 dígitos.
 		if (s.isEmpty() || s.length() > 5) {
@@ -513,7 +449,7 @@ public class Lexico {
 	}
 
 	// Verifica la cantidad de bits del float recibido como String.
-	public boolean checkFloat(String s) {
+	private boolean checkFloat(String s) {
 	
 		// Verifico que el string no esté vacío.
 		if (s.isEmpty()) {
@@ -525,7 +461,6 @@ public class Lexico {
 			// Convierto a float. Si se convierte, el valor está dentro
 			// de los valores aceptables para el tipo float de Java.
 			float numero = Float.valueOf(s);
-			vista.agregarLinea(numero);
 			
 			if(
 				numero == Float.POSITIVE_INFINITY
@@ -545,7 +480,7 @@ public class Lexico {
 	}
 	
 	// Verifica que el String no tenga más de 30 caracteres.
-	public boolean checkStr(String s) {
+	private boolean checkStr(String s) {
 		if (s.isEmpty() || (s.length() > STR_MAX_LEN)) {
 			return false;
 		}
@@ -554,11 +489,30 @@ public class Lexico {
 	}
 	
 	// Imprime cada par token:lexema hallado.
-	public void anuncio(String token) {
+	private void anuncio(String token) {
 		vista.agregarLinea("*** Nuevo hallazgo ***");
-		vista.agregarLinea("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");
-		//EscribeAnalisis.escribir("*** Nuevo hallazgo ***", true);
-		//EscribeAnalisis.escribir("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n", true);
+		vista.agregarLinea("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");	
+	}
+	
+	// Comunica que se encontró un lexema inválido.
+	private void anunciarError(String mensaje) {
+		vista.agregarLinea("¡Lexema inválido!");
+		vista.agregarLinea("\t" + mensaje + "\n");	
+	}
+	
+	// Guarda el par token:lexema en la lista de Tokens interna.
+	private void guardoToken(String token) {
+		listaTokens.add(new Token(token, yytext()));
+	}
+	
+	// Permite obtener la lista de pares token:lexema.
+	public ArrayList<Token> getListaTokens() {
+		return listaTokens;
+	}
+	
+	// Permite vincular una vista.
+	public void agregarVista(Vista actual) {
+		vista = actual;
 	}
 
 
@@ -805,6 +759,18 @@ public class Lexico {
   }
 
 
+  /**
+   * Contains user EOF-code, which will be executed exactly once,
+   * when the end of file is reached
+   */
+  private void zzDoEOF() throws java.io.IOException {
+    if (!zzEOFDone) {
+      zzEOFDone = true;
+    
+  yyclose();    }
+  }
+
+
 
 
   /**
@@ -814,7 +780,7 @@ public class Lexico {
    * @return the next token.
    * @exception java.io.IOException if any I/O-Error occurs.
    */
-  public int yylex() throws java.io.IOException {
+  @Override  public java_cup.runtime.Symbol next_token() throws java.io.IOException {
     int zzInput;
     int zzAction;
 
@@ -950,12 +916,13 @@ public class Lexico {
 
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
-        return YYEOF;
+            zzDoEOF();
+          { return new java_cup.runtime.Symbol(sym.EOF); }
       }
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { throw new Error("Carácter '" + yytext() + "' no permitido, en la línea " + this.yyline + ", y columna " + this.yycolumn + ".");
+            { anunciarError("Lexema '" + yytext() + "' no permitido, en la línea " + this.yyline + ", y columna " + this.yycolumn + ".");
             }
             // fall through
           case 40: break;
@@ -965,37 +932,37 @@ public class Lexico {
             // fall through
           case 41: break;
           case 3:
-            { anuncio("PAR_ABRE");
+            { anuncio("PAR_ABRE"); guardoToken("PAR_ABRE");
             }
             // fall through
           case 42: break;
           case 4:
-            { anuncio("PAR_CIERRA");
+            { anuncio("PAR_CIERRA"); guardoToken("PAR_CIERRA");
             }
             // fall through
           case 43: break;
           case 5:
-            { anuncio("MULTIPLICA");
+            { anuncio("MULTIPLICA"); guardoToken("MULTIPLICA");
             }
             // fall through
           case 44: break;
           case 6:
-            { anuncio("SUMA");
+            { anuncio("SUMA"); guardoToken("SUMA");
             }
             // fall through
           case 45: break;
           case 7:
-            { anuncio("COMA");
+            { anuncio("COMA"); guardoToken("COMA");
             }
             // fall through
           case 46: break;
           case 8:
-            { anuncio("RESTA");
+            { anuncio("RESTA"); guardoToken("RESTA");
             }
             // fall through
           case 47: break;
           case 9:
-            { anuncio("DIVIDE");
+            { anuncio("DIVIDE"); guardoToken("DIVIDE");
             }
             // fall through
           case 48: break;
@@ -1004,48 +971,48 @@ public class Lexico {
 								if (!checkInt(yytext())) {
 									vista.agregarLinea("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
 								} else {
-									//addSym("_" + yytext(), "CONST_INT", yytext(), null);
+									guardoToken("CONST_INT");
 								}
             }
             // fall through
           case 49: break;
           case 11:
-            { anuncio("PUNTO_COMA");
+            { anuncio("PUNTO_COMA"); guardoToken("PUNTO_COMA");
             }
             // fall through
           case 50: break;
           case 12:
-            { anuncio("MENOR");
+            { anuncio("MENOR"); guardoToken("MENOR");
             }
             // fall through
           case 51: break;
           case 13:
-            { anuncio("MAYOR");
+            { anuncio("MAYOR"); guardoToken("MAYOR");
             }
             // fall through
           case 52: break;
           case 14:
-            { anuncio("ID_VAR"); /* addSym(yytext(), "ID_VAR", null); */
+            { anuncio("ID_VAR"); guardoToken("ID_VAR");
             }
             // fall through
           case 53: break;
           case 15:
-            { anuncio("COR_ABRE");
+            { anuncio("COR_ABRE"); guardoToken("COR_ABRE");
             }
             // fall through
           case 54: break;
           case 16:
-            { anuncio("COR_CIERRA");
+            { anuncio("COR_CIERRA"); guardoToken("COR_CIERRA");
             }
             // fall through
           case 55: break;
           case 17:
-            { anuncio("LLAVE_ABRE");
+            { anuncio("LLAVE_ABRE"); guardoToken("LLAVE_ABRE");
             }
             // fall through
           case 56: break;
           case 18:
-            { anuncio("LLAVE_CIERRA");
+            { anuncio("LLAVE_CIERRA"); guardoToken("LLAVE_CIERRA");
             }
             // fall through
           case 57: break;
@@ -1054,13 +1021,13 @@ public class Lexico {
 								if (!checkStr(yytext())) {
 									vista.agregarLinea("Lexema " + yytext() + " excede la longitud máxima de un String (" + STR_MAX_LEN + ").\n");		
 								} else {
-									//addSym("_" + yytext(), "CONST_STR", yytext(), yytext().length());
+									guardoToken("CONST_STR");
 								}
             }
             // fall through
           case 58: break;
           case 20:
-            { anuncio("AND");
+            { anuncio("AND"); guardoToken("AND");
             }
             // fall through
           case 59: break;
@@ -1069,98 +1036,98 @@ public class Lexico {
 								if (!checkFloat(yytext())) {
 									vista.agregarLinea("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
 								} else {
-									//addSym("_" + yytext(), "CONST_FLOAT", yytext(), null);
+									guardoToken("CONST_FLOAT");
 								}
             }
             // fall through
           case 60: break;
           case 22:
-            { anuncio("MENOR_IGUAL");
+            { anuncio("MENOR_IGUAL"); guardoToken("MENOR_IGUAL");
             }
             // fall through
           case 61: break;
           case 23:
-            { anuncio("DISTINTO");
+            { anuncio("DISTINTO"); guardoToken("DISTINTO");
             }
             // fall through
           case 62: break;
           case 24:
-            { anuncio("IGUAL");
+            { anuncio("IGUAL"); guardoToken("IGUAL");
             }
             // fall through
           case 63: break;
           case 25:
-            { anuncio("MAYOR_IGUAL");
+            { anuncio("MAYOR_IGUAL"); guardoToken("MAYOR_IGUAL");
             }
             // fall through
           case 64: break;
           case 26:
-            { anuncio("IF");
+            { anuncio("IF"); guardoToken("IF");
             }
             // fall through
           case 65: break;
           case 27:
-            { anuncio("OR");
+            { anuncio("OR"); guardoToken("OR");
             }
             // fall through
           case 66: break;
           case 28:
-            { anuncio("ASIGNA");
+            { anuncio("ASIGNA"); guardoToken("ASIGNA");
             }
             // fall through
           case 67: break;
           case 29:
-            { anuncio("TIPO_DATO");
+            { anuncio("TIPO_DATO"); guardoToken("TIPO_DATO");
             }
             // fall through
           case 68: break;
           case 30:
-            { anuncio("ELSE");
+            { anuncio("ELSE"); guardoToken("ELSE");
             }
             // fall through
           case 69: break;
           case 31:
-            { anuncio("WHILE");
+            { anuncio("WHILE"); guardoToken("WHILE");
             }
             // fall through
           case 70: break;
           case 32:
-            { anuncio("WRITE");
+            { anuncio("WRITE"); guardoToken("WRITE");
             }
             // fall through
           case 71: break;
           case 33:
-            { anuncio("COMENTARIO_SIMPLE");
+            { anuncio("COMENTARIO_SIMPLE"); guardoToken("COMENTARIO_SIMPLE");
             }
             // fall through
           case 72: break;
           case 34:
-            { anuncio("POSITION");
+            { anuncio("POSITION"); guardoToken("POSITION");
             }
             // fall through
           case 73: break;
           case 35:
-            { anuncio("COMENTARIO_DOBLE");
+            { anuncio("COMENTARIO_DOBLE"); guardoToken("COMENTARIO_DOBLE");
             }
             // fall through
           case 74: break;
           case 36:
-            { anuncio("SEC_COMIENZO");
+            { anuncio("SEC_COMIENZO"); guardoToken("SEC_COMIENZO");
             }
             // fall through
           case 75: break;
           case 37:
-            { anuncio("PROG_COMIENZO");
+            { anuncio("PROG_COMIENZO"); guardoToken("PROG_COMIENZO");
             }
             // fall through
           case 76: break;
           case 38:
-            { anuncio("SEC_FIN");
+            { anuncio("SEC_FIN"); guardoToken("SEC_FIN");
             }
             // fall through
           case 77: break;
           case 39:
-            { anuncio("PROG_FIN");
+            { anuncio("PROG_FIN"); guardoToken("PROG_FIN");
             }
             // fall through
           case 78: break;
