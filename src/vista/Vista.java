@@ -10,43 +10,54 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class Vista extends JPanel{
+public class Vista extends JFrame {
     private JTextArea textoSalida;
     private JTextField textoUrl;
     private JButton botonAceptar;
     private JLabel labelUrl;
     private JLabel labelResult;
+    private JScrollPane panelScrolleable;
+    private JPanel panelFlow, panelArriba, panelPrincipal;
 
+    public Vista(String nombre) {
+    	super(nombre);
+    	
+    	
+    	// Panel de arriba.
+    	panelArriba = new JPanel(new BorderLayout());
+	    	panelFlow = new JPanel(new FlowLayout());
+	    		labelUrl = new JLabel ("Ingrese el URL del texto a analizar:");
+	    		textoUrl = new JTextField (15);
+	    		botonAceptar = new JButton ("Aceptar");
+	    		panelFlow.add(labelUrl);
+	    		panelFlow.add(textoUrl);
+	    		panelFlow.add(botonAceptar);
+	    	labelResult = new JLabel ("Resultados");
+	    	panelArriba.add(panelFlow, BorderLayout.CENTER);
+	    	panelArriba.add(labelResult, BorderLayout.PAGE_END);
+                
+        // Panel scrolleable central. 
+        textoSalida = new JTextArea ();
+        panelScrolleable = new JScrollPane(textoSalida);
 
-    public Vista() {
-        //construct components
-        textoSalida = new JTextArea (5, 5);
-        textoUrl = new JTextField (5);
-        botonAceptar = new JButton ("Aceptar");
-        labelUrl = new JLabel ("Ingrese el URl de el texto a analizar");
-        labelResult = new JLabel ("Resultados");
-
-        //adjust size and set layout
-        setPreferredSize(new Dimension(944, 563));
-        setLayout(null);
+        // Panel principal.
+        panelPrincipal = new JPanel(new BorderLayout());
+    	panelPrincipal.add(panelArriba, BorderLayout.PAGE_START);
+    	panelPrincipal.add(panelScrolleable, BorderLayout.CENTER);
+    	
+    	// Agrega handler del evento clic sobre el botón.
         botonAceptar.addActionListener((new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 start();
-            }}));
-
-            //add components
-        add(textoSalida);
-        add(textoUrl);
-        add(botonAceptar);
-        add (labelUrl);
-        add (labelResult);
-
-        //set component bounds (only needed by Absolute Positioning)
-        textoSalida.setBounds (75, 140, 750, 330);
-        textoUrl.setBounds (80, 65, 635, 30);
-        botonAceptar.setBounds (725, 65, 100, 30);
-        labelUrl.setBounds (80, 35, 260, 25);
-        labelResult.setBounds (75, 110, 750, 25);
+            }
+        }));
+        
+        // Configs del JFrame.
+        this.setContentPane(panelPrincipal);
+        this.setPreferredSize(new Dimension(600, 400));
+        this.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+        this.pack();
+        this.setVisible(true);
     }
 
     public void agregarLinea(float linea){
@@ -57,22 +68,25 @@ public class Vista extends JPanel{
     }
 
     public void start(){
-        FileReader reader;
-        textoSalida.setText("");
-        try {
-            // Carga el archivo de texto desde url
-            reader = new FileReader(textoUrl.getText());
-
-            // Realiza el análisis lexicográfico.
-            Lexico lexer = new Lexico(reader);
-            lexer.agregarVista(this);
-            lexer.yylex();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            agregarLinea("Archivo no encontrado");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
+        if(!textoUrl.getText().isEmpty()) {
+    	
+	    	FileReader reader;
+	        textoSalida.setText("");
+	        try {
+	            // Carga el archivo de texto desde url
+	            reader = new FileReader(textoUrl.getText());
+	
+	            // Realiza el análisis lexicográfico.
+	            Lexico lexer = new Lexico(reader);
+	            lexer.agregarVista(this);
+	            lexer.yylex();
+	        } catch (FileNotFoundException e) {
+	            //e.printStackTrace();
+	            agregarLinea("Archivo no encontrado");
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            System.exit(-1);
+	        }
         }
     }
 }
