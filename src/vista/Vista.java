@@ -16,10 +16,12 @@ import java.util.ArrayList;
 public class Vista extends JFrame {
     private JTextArea textoSalida, editor;
     private JTextField textoUrl;
-    private JButton botonCargar, botonAnalizar;
+    private JButton botonCargar, botonAnalizar, botonMostrarTabla;
     private JLabel labelUrl, labelResult, labelEditor;
     private JScrollPane scrollerSalida, scrollerEditor;
     private JPanel panelFlow, panelArriba, panelMedio, panelAbajo, panelPrincipal;
+    private JFrame vistaTabla;
+    Lexico lexer;
 
     public Vista(String nombre) {
     	super(nombre);
@@ -52,9 +54,10 @@ public class Vista extends JFrame {
 	    	textoSalida.setEnabled(false);
 	    	scrollerSalida = new JScrollPane(textoSalida);
 	    	scrollerSalida.setPreferredSize(new Dimension(100, 200));
+	    	botonMostrarTabla = new JButton("Mostrar tabla de símbolos");
 	    	panelAbajo.add(labelResult, BorderLayout.PAGE_START);
 	    	panelAbajo.add(scrollerSalida, BorderLayout.CENTER);
-	    
+	    	panelAbajo.add(botonMostrarTabla, BorderLayout.PAGE_END);
         
         // Panel principal.
         panelPrincipal = new JPanel(new BorderLayout());
@@ -73,8 +76,14 @@ public class Vista extends JFrame {
                 start();
             }
         }));
+    	botonMostrarTabla.addActionListener((new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mostrarTablaDeSimbolos();
+            }
+        }));
         
         // Configs del JFrame.
+    	this.setResizable(false);
         this.setContentPane(panelPrincipal);
         this.setPreferredSize(new Dimension(600, 500));
         this.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
@@ -117,24 +126,27 @@ public class Vista extends JFrame {
 	        textoSalida.setText("");
         	
             // Realiza el análisis lexicográfico.
-            Lexico lexer = new Lexico(reader);
+            lexer = new Lexico(reader);
             lexer.agregarVista(this);
             
             try {
 				lexer.next_token();
-				
-				/*
-	            ArrayList<Token> listaTokens = lexer.getListaTokens();
-	            System.out.println("Cantidad de tokens encontrados: " + listaTokens.size());
-	            for(Token e: listaTokens) {
-	            	System.out.println(e.getNombre() + ":" + e.getLexema());
-	            }
-	            */
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(-1);
 			}
         }
+    }
+    
+    private void mostrarTablaDeSimbolos() {
+    	if(lexer != null) {
+	    	javax.swing.SwingUtilities.invokeLater(new Runnable() {
+	            public void run() {
+		            ArrayList<Token> listaTokens = lexer.getListaTokens();
+	            	vistaTabla = new Tabla(listaTokens);
+	            }
+	        });
+    	}
     }
     
     private void centrarVentana() {

@@ -4,6 +4,10 @@ import vista.Vista;
 
 public class Main {
 	public static void main(String[] args) {
-		new Vista("Analizador lexicográfico");
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	new Vista("Analizador lexicográfico");
+            }
+        });
 	}
 }
