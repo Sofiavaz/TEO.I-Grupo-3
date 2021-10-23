@@ -50,6 +50,7 @@ public class Tabla extends JFrame {
 				break;
 			case "CONST_STR":
 				registros[i][0] = "_" + registros[i][0];
+				registros[i][0] = ((String) registros[i][0]).replace(' ', '_');
 				registros[i][2] = listaTokensFinal.get(i).getLexema();
 				registros[i][3] = listaTokensFinal.get(i).getLexema().length();
 				break;

@@ -113,7 +113,15 @@ import vista.Vista;
 	
 	// Guarda el par token:lexema en la lista de Tokens interna.
 	private void guardoToken(String token) {
-		listaTokens.add(new Token(token, yytext()));
+		if(token.equals("CONST_STR"))
+			listaTokens.add(
+				new Token(
+					token,
+					yytext().substring(1, yytext().length() - 1)
+				)
+			);
+		else
+			listaTokens.add(new Token(token, yytext()));
 	}
 	
 	// Permite obtener la lista de pares token:lexema.
@@ -176,6 +184,13 @@ ID_VAR = [a-zA-Z]([a-zA-Z]|[0-9]|\_)*
 
 POSITION = [Pp][Oo][Ss][Ii][Tt][Ii][Oo][Nn]
 
+DECLARE = [Dd][Ee][Cc][Ll][Aa][Rr][Ee]\.[Ss][Ee][Cc][Tt][Ii][Oo][Nn]
+ENDDECLARE = [Ee][Nn][Dd][Dd][Ee][Cc][Ll][Aa][Rr][Ee]\.[Ss][Ee][Cc][Tt][Ii][Oo][Nn]
+PROGRAM = [Pp][Rr][Oo][Gg][Rr][Aa][Mm]\.[Ss][Ee][Cc][Tt][Ii][Oo][Nn]
+ENDPROGRAM = [Ee][Nn][Dd][Pp][Rr][Oo][Gg][Rr][Aa][Mm]\.[Ss][Ee][Cc][Tt][Ii][Oo][Nn]
+
+AND = [Aa][Nn][Dd]
+OR = [Oo][Rr]
 
 /* ------------------------------------------------------------------ */
 %% /* Reglas léxicas */
@@ -184,25 +199,26 @@ POSITION = [Pp][Oo][Ss][Ii][Tt][Ii][Oo][Nn]
 <YYINITIAL> {
 	{COMENTARIO_DOBLE}		{anuncio("COMENTARIO_DOBLE"); guardoToken("COMENTARIO_DOBLE");}
 	{COMENTARIO_SIMPLE}		{anuncio("COMENTARIO_SIMPLE"); guardoToken("COMENTARIO_SIMPLE");}
-    "DECLARE\.SECTION"		{anuncio("SEC_COMIENZO"); guardoToken("SEC_COMIENZO");}
-    "ENDDECLARE\.SECTION"	{anuncio("SEC_FIN"); guardoToken("SEC_FIN");}
-    "PROGRAM\.SECTION"		{anuncio("PROG_COMIENZO"); guardoToken("PROG_COMIENZO");}
-    "ENDPROGRAM\.SECTION"	{anuncio("PROG_FIN"); guardoToken("PROG_FIN");}
+    {DECLARE}				{anuncio("SEC_COMIENZO"); guardoToken("SEC_COMIENZO");}
+    {ENDDECLARE}			{anuncio("SEC_FIN"); guardoToken("SEC_FIN");}
+    {PROGRAM}				{anuncio("PROG_COMIENZO"); guardoToken("PROG_COMIENZO");}
+    {ENDPROGRAM}			{anuncio("PROG_FIN"); guardoToken("PROG_FIN");}
     {POSITION}				{anuncio("POSITION"); guardoToken("POSITION");}
     {WRITE}					{anuncio("WRITE"); guardoToken("WRITE");}
     {IF}					{anuncio("IF"); guardoToken("IF");}
     {ELSE}					{anuncio("ELSE"); guardoToken("ELSE");}
     {WHILE}					{anuncio("WHILE"); guardoToken("WHILE");}
     {TIPO_DATO}				{anuncio("TIPO_DATO"); guardoToken("TIPO_DATO");}
-	"::="					{anuncio("ASIGNA"); guardoToken("ASIGNA");}
+	"::="					{anuncio("ASIGNA_VAR"); guardoToken("ASIGNA_VAR");}
+	":="					{anuncio("ASIGNA_TIPO"); guardoToken("ASIGNA_TIPO");}
     "=="					{anuncio("IGUAL"); guardoToken("IGUAL");}
     "<>"					{anuncio("DISTINTO"); guardoToken("DISTINTO");}
     "<"						{anuncio("MENOR"); guardoToken("MENOR");}
     "<="					{anuncio("MENOR_IGUAL"); guardoToken("MENOR_IGUAL");}
     ">"						{anuncio("MAYOR"); guardoToken("MAYOR");}
     ">="					{anuncio("MAYOR_IGUAL"); guardoToken("MAYOR_IGUAL");}
-    "&&"					{anuncio("AND"); guardoToken("AND");}
-    "||"					{anuncio("OR"); guardoToken("OR");}
+    {AND}					{anuncio("AND"); guardoToken("AND");}
+    {OR}					{anuncio("OR"); guardoToken("OR");}
     "+"						{anuncio("SUMA"); guardoToken("SUMA");}
     "-"						{anuncio("RESTA"); guardoToken("RESTA");}
     "("						{anuncio("PAR_ABRE"); guardoToken("PAR_ABRE");}
