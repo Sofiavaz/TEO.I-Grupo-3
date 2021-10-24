@@ -8,6 +8,5 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/java-cup-11b-runtime_1.jar"/>
 	<classpathentry kind="lib" path="lib/jflex-full-1.8.2.jar"/>
-	<classpathentry kind="lib" path="lib/compilador.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
