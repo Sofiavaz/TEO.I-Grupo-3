@@ -27,7 +27,7 @@ public class Tabla extends JFrame {
 		
 		ArrayList<Token> listaTokensFinal = new ArrayList<Token>();
 		for(Token t: listaTokens) {
-			switch(t.getNombre()) {
+			switch(t.getNombreToken()) {
 				case "ID_VAR":
 				case "CONST_INT":
 				case "CONST_FLOAT":
@@ -41,23 +41,20 @@ public class Tabla extends JFrame {
 		
 		Object[][] registros = new Object[listaTokensFinal.size()][4];
 		for(int i = 0; i < listaTokensFinal.size(); i++) {
-			registros[i][0] = listaTokensFinal.get(i).getLexema();
-			registros[i][1] = listaTokensFinal.get(i).getNombre();
-			switch(listaTokensFinal.get(i).getNombre()) {
+			registros[i][0] = listaTokensFinal.get(i).getNombreSimbolo();
+			registros[i][1] = listaTokensFinal.get(i).getNombreToken();
+			switch(listaTokensFinal.get(i).getNombreToken()) {
 			case "ID_VAR": 
-				registros[i][2] = "-";
-				registros[i][3] = "-";
+				registros[i][2] = "-"; // Columna valor.
+				registros[i][3] = "-"; // Columna longitud.
 				break;
 			case "CONST_STR":
-				registros[i][0] = "_" + registros[i][0];
-				registros[i][0] = ((String) registros[i][0]).replace(' ', '_');
-				registros[i][2] = listaTokensFinal.get(i).getLexema();
-				registros[i][3] = listaTokensFinal.get(i).getLexema().length();
+				registros[i][2] = listaTokensFinal.get(i).getLexema(); // Columna valor.
+				registros[i][3] = listaTokensFinal.get(i).getLexema().length(); // Columna longitud.
 				break;
 			default:
-				registros[i][0] = "_" + registros[i][0];
-				registros[i][2] = listaTokensFinal.get(i).getLexema();
-				registros[i][3] = "-";
+				registros[i][2] = listaTokensFinal.get(i).getLexema(); // Columna valor.
+				registros[i][3] = "-"; // Columna longitud.
 			}
 		}
 		

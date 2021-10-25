@@ -102,7 +102,10 @@ import vista.Vista;
 	// Imprime cada par token:lexema hallado.
 	private void anuncio(String token) {
 		vista.agregarLinea("*** Nuevo hallazgo ***");
-		vista.agregarLinea("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");	
+		if(token.equals("CONST_STR"))
+			vista.agregarLinea("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");
+		else
+			vista.agregarLinea("\tToken = " + token + "\n\tLexema = " + yytext() + "\n");	
 	}
 	
 	// Comunica que se encontró un lexema inválido.
@@ -113,15 +116,41 @@ import vista.Vista;
 	
 	// Guarda el par token:lexema en la lista de Tokens interna.
 	private void guardoToken(String token) {
-		if(token.equals("CONST_STR"))
-			listaTokens.add(
-				new Token(
-					token,
-					yytext().substring(1, yytext().length() - 1)
-				)
-			);
-		else
-			listaTokens.add(new Token(token, yytext()));
+		String lexema = yytext();
+		
+		switch(token) {
+			case "CONST_STR":
+				// Si es String recorta las comillas para
+				// que no sean parte del lexema.
+				lexema = lexema.substring(1, lexema.length() - 1);
+			case "CONST_INT":
+			case "CONST_FLOAT":
+				// Si es una constante:
+				
+				boolean hayDuplicado = false;
+				int indice = 0;
+				while(!hayDuplicado && indice < listaTokens.size()) {
+					if(
+						listaTokens.get(indice).getNombreToken().equals(token)
+						&&
+						listaTokens.get(indice).getLexema().equals(lexema)
+					) hayDuplicado = true;
+					else indice++;
+				} 
+
+				// Si en la lista hay otra constante del mismo tipo, y con el mismo valor, 
+				// le indica al constructor de Token que está duplicado; si no, le indica
+				// la contrario.			
+				if(hayDuplicado) listaTokens.add(new Token(token, lexema, true));
+				else listaTokens.add(new Token(token, lexema, false));
+
+				break;
+			default:
+				// Si no, agrega el Token sin indicar duplicación.
+				listaTokens.add(new Token(token, lexema, false));
+								
+				break;
+		}
 	}
 	
 	// Permite obtener la lista de pares token:lexema.
