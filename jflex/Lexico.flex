@@ -249,7 +249,7 @@ OR = [Oo][Rr]
 	{CONST_STR}				{
 								anuncio("CONST_STR");
 								if (!checkStr(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " excede la longitud máxima de un String (" + STR_MAX_LEN + ").\n");		
+									vista.agregarLinea("Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
 								} else {
 									guardoToken("CONST_STR");
 								}

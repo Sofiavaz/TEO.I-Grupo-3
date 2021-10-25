@@ -111,7 +111,8 @@ public class Vista extends JFrame {
 	            editor.read(reader, null);
 	            
 	        } catch (FileNotFoundException e) {
-	            agregarLinea("Archivo no encontrado");
+	            textoSalida.setText("");
+	        	agregarLinea("Archivo no encontrado");
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	            System.exit(-1);
