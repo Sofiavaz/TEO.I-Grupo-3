@@ -1,6 +1,5 @@
 # Teoría de la Computación I - Grupo 3
 ## Integrantes
-+ Colombo Kevin
 + Iarza Esteban
 + Laffont Facundo
 + Nocella Yatel
