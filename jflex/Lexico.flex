@@ -110,11 +110,15 @@ import vista.Vista;
 	
 	// Comunica que se encontró un lexema inválido.
 	private void anunciarError(String mensaje) {
+		vista.limpiarSalida();
+		listaTokens.clear();
 		vista.agregarLinea("¡Lexema inválido!");
-		vista.agregarLinea("\t" + mensaje + "\n");	
+		vista.agregarLinea("\t" + mensaje + "\n");
+		throw new Error(mensaje);
 	}
 	
-	// Guarda el par token:lexema en la lista de Tokens interna.
+	// Guarda el par token:lexema en la lista de Tokens interna,
+	// si no está duplicado.
 	private void guardoToken(String token) {
 		String lexema = yytext();
 		
@@ -125,7 +129,8 @@ import vista.Vista;
 				lexema = lexema.substring(1, lexema.length() - 1);
 			case "CONST_INT":
 			case "CONST_FLOAT":
-				// Si es una constante:
+			case "ID_VAR":
+				// Si es una constante o un identificador:
 				
 				boolean hayDuplicado = false;
 				int indice = 0;
@@ -138,16 +143,13 @@ import vista.Vista;
 					else indice++;
 				} 
 
-				// Si en la lista hay otra constante del mismo tipo, y con el mismo valor, 
-				// le indica al constructor de Token que está duplicado; si no, le indica
-				// la contrario.			
-				if(hayDuplicado) listaTokens.add(new Token(token, lexema, true));
-				else listaTokens.add(new Token(token, lexema, false));
+				// Si no hay duplicado, guarda el token.
+				if(!hayDuplicado) listaTokens.add(new Token(token, lexema));
 
 				break;
 			default:
-				// Si no, agrega el Token sin indicar duplicación.
-				listaTokens.add(new Token(token, lexema, false));
+				// Cualquier otro token, lo agrega.
+				listaTokens.add(new Token(token, lexema));
 								
 				break;
 		}
@@ -170,14 +172,13 @@ import vista.Vista;
 ESPACIO = [\r\n\t\f ]
 
 CONST_INT = [0-9]+
-CONST_FLOAT = -?([0-9]*\.[0-9]+|[0-9]+\.[0-9]*)(e(\+|-)?[0-9][0-9]?)?
-//	-? -> Signo menos opcional al comienzo.
+CONST_FLOAT = ([0-9]*\.[0-9]+|[0-9]+\.[0-9]*)(e(\+|-)?[0-9][0-9]?)?
 //	(
 //		[0-9]*\.[0-9]+ -> Permite que el float detectado no tenga dígitos en la parte entera.
 //	|
 //		[0-9]+\.[0-9]* -> Permite que el float detectado no tenga dígitos en la parte decimal.
 //	)
-//		(e(\+|-)?[0-9][0-9]?)? -> Opción de utilizar la notación científica como postfijo.
+//	(e(\+|-)?[0-9][0-9]?)? -> Opción de utilizar la notación científica como postfijo.
 CONST_STR = \"[^\"]*\"
 
 INT = [Ii][Nn][Tt]
@@ -226,8 +227,8 @@ OR = [Oo][Rr]
 /* ------------------------------------------------------------------ */
 
 <YYINITIAL> {
-	{COMENTARIO_DOBLE}		{anuncio("COMENTARIO_DOBLE"); guardoToken("COMENTARIO_DOBLE");}
-	{COMENTARIO_SIMPLE}		{anuncio("COMENTARIO_SIMPLE"); guardoToken("COMENTARIO_SIMPLE");}
+	{COMENTARIO_DOBLE}		{}
+	{COMENTARIO_SIMPLE}		{}
     {DECLARE}				{anuncio("SEC_COMIENZO"); guardoToken("SEC_COMIENZO");}
     {ENDDECLARE}			{anuncio("SEC_FIN"); guardoToken("SEC_FIN");}
     {PROGRAM}				{anuncio("PROG_COMIENZO"); guardoToken("PROG_COMIENZO");}

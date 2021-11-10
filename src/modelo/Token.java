@@ -6,14 +6,10 @@ public class Token {
 	private String lexema;
 	private static int sigValor;
 	
-	public Token(String nombreToken, String lexema, boolean duplicado) {
+	public Token(String nombreToken, String lexema) {
 		this.nombreToken = nombreToken;
 		this.lexema = lexema;
-		if(duplicado) {
-			// Si hay duplicados, añade sigValor al nombre del símbolo
-			// para que no haya duplicados.
-			nombreSimbolo = "_" + lexema + "_" + sigValor++;
-		} else nombreSimbolo = "_" + lexema;
+		nombreSimbolo = "_" + lexema;
 		
 		if(nombreToken.equals("CONST_STR"))
 			nombreSimbolo = nombreSimbolo.replace(' ', '_');

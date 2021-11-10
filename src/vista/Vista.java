@@ -91,13 +91,13 @@ public class Vista extends JFrame {
         this.setVisible(true);
         centrarVentana();
     }
-
-    public void agregarLinea(float linea){
-        textoSalida.append(String.valueOf(linea) +'\n');
-    }
     
     public void agregarLinea(String linea){
         textoSalida.append(linea+'\n');
+    }
+    
+    public void limpiarSalida() {
+    	textoSalida.setText("");
     }
 
     private void cargarArchivo() {
