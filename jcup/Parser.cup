@@ -1,0 +1,132 @@
+/* Imports. */
+import java_cup.runtime.*;
+
+parser code {:
+:}
+
+action code
+{:
+:}
+
+/* Símbolos terminales. */
+terminal SEC_COMIENZO, SEC_FIN, PROG_COMIENZO, PROG_FIN;
+terminal POSITION, WRITE;
+terminal IF, ELSE, WHILE;
+terminal TIPO_DATO, CONST_INT, CONST_FLOAT, CONST_STR, ID_VAR, ASIGNA_VAR, ASIGNA_TIPO;
+terminal IGUAL, DISTINTO, MENOR, MENOR_IGUAL, MAYOR, MAYOR_IGUAL, AND, OR;
+terminal SUMA, RESTA, DIVIDE, MULTIPLICA;
+terminal PAR_ABRE, PAR_CIERRA, LLAVE_ABRE, LLAVE_CIERRA, COR_ABRE, COR_CIERRA, PUNTO_COMA, COMA;
+
+/* Símbolos no terminales. */
+non terminal <programa>, <seccion_de_declaraciones>, <seccion_de_programa>;
+non terminal <declaraciones>, <declaracion>, <otros_tipos>;
+non terminal <conjunto_de_sentencias>, <sentencia>, <asignacion>, <seleccion>, <iteracion>, <write>, <else>;
+non terminal <condicion>, <comparacion_numerica>, <comparacion_de_cadenas>, <expresion>, <comparador>, <expresion_string>;
+non terminal <termino>, <factor>;
+non terminal <position>, <lista_enteros>, <mas_enteros>;
+
+/* Símbolo distinguido. */
+start with <programa>;
+
+/* GLC */
+<programa> ::= <seccion_de_declaraciones> <seccion_de_programa>
+
+<seccion_de_declaraciones> ::= SEC_COMIENZO <declaraciones> SEC_FIN
+
+<declaraciones> ::=
+  <declaracion> <declaraciones>
+  | <declaracion>
+
+<declaracion> ::= COR_ABRE ID_VAR <otros_tipos> TIPO_DATO COR_CIERRA
+
+<otros_tipos> ::=
+  COMA ID_VAR <otros_tipos> TIPO_DATO COMA
+  | COR_CIERRA ASIGNA_TIPO COR_ABRE
+
+<seccion_de_programa> ::= PROG_COMIENZO <conjunto_de_sentencias> PROG_FIN
+
+<conjunto_de_sentencias> ::=
+  <sentencia> <conjunto_de_sentencias>
+  | <sentencia>
+
+<sentencia> ::=
+	<asignacion>
+	| <seleccion>
+	| <iteracion>
+	| <write>
+
+<write> ::=
+  WRITE ID_VAR PUNTO_COMA
+  | WRITE CONST_FLOAT
+  | WRITE CONST_INT
+  | WRITE CONST_STR
+  | WRITE <position>
+
+<asignacion> ::=
+  ID_VAR ASIGNA_VAR <expresion> PUNTO_COMA
+  | ID_VAR ASIGNA_VAR CONST_STR PUNTO_COMA
+
+<seleccion> ::=
+  IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE <declaraciones> LLAVE_CIERRA
+  | IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE <declaraciones> LLAVE_CIERRA <else>
+  | IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA
+  | IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA <else>
+
+<else> ::=
+  ELSE <seleccion>
+  | ELSE LLAVE_ABRE <declaraciones> LLAVE_CIERRA
+
+<iteracion> ::= WHILE PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE <declaraciones> LLAVE_CIERRA
+
+<condicion> ::=
+  <comparacion_numerica>
+  | <comparacion_de_cadenas>
+  | <comparacion_numerica> AND <comparacion_numerica>
+  | <comparacion_de_cadenas> AND <comparacion_de_cadenas>
+  | <comparacion_numerica> OR <comparacion_numerica>
+  | <comparacion_de_cadenas> OR <comparacion_de_cadenas>
+
+<comparacion_numerica> ::= <expresion> <comparador> <expresion>
+
+<comparacion_de_cadenas> ::= <expresion_string> <comparador> <expresion_string>
+
+<comparador> ::=
+  IGUAL
+  | MAYOR
+  | MAYOR_IGUAL
+  | MENOR
+  | MENOR_IGUAL
+  | DISTINTO
+
+<expresion_string> ::=
+  ID_VAR
+  | CONST_STR
+
+<expresion> ::=
+  <expresion> SUMA <termino>
+  | <expresion> RESTA <termino>
+  | <termino>
+
+<termino> ::=
+  <termino> DIVIDE <factor>
+  | <termino> MULTIPLICA <factor>
+  | <factor>
+
+<factor> ::=
+  ID_VAR
+  | CONST_FLOAT
+  | CONST_INT
+  | <position>
+  | PAR_ABRE <expresion> PAR_CIERRA
+
+<position> ::=
+  POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE <lista_enteros> COR_CIERRA PAR_CIERRA
+  | POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA PUNTO_COMA
+
+<lista_enteros> ::=
+  CONST_INT <mas_enteros>
+  | CONST_INT
+
+<mas_enteros> ::=
+  COMA CONST_INT <mas_enteros>
+  | COMA CONST_INT

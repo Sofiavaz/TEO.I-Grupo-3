@@ -10,6 +10,7 @@ package modelo;
 import jflex.core.sym; // Necesario para el método next_token(). 
 import java.util.ArrayList;
 import vista.Vista;
+import java_cup.runtime.*;
 
 
 /* ------------------------------------------------------------------ */
@@ -962,96 +963,95 @@ public class Lexico implements java_cup.runtime.Scanner {
             // fall through
           case 41: break;
           case 3:
-            { anuncio("PAR_ABRE"); guardoToken("PAR_ABRE");
+            { return new Symbol(sym.PAR_ABRE, yytext());
             }
             // fall through
           case 42: break;
           case 4:
-            { anuncio("PAR_CIERRA"); guardoToken("PAR_CIERRA");
+            { return new Symbol(sym.PAR_CIERRA, yytext());
             }
             // fall through
           case 43: break;
           case 5:
-            { anuncio("MULTIPLICA"); guardoToken("MULTIPLICA");
+            { return new Symbol(sym.MULTIPLICA, yytext());
             }
             // fall through
           case 44: break;
           case 6:
-            { anuncio("SUMA"); guardoToken("SUMA");
+            { return new Symbol(sym.SUMA, yytext());
             }
             // fall through
           case 45: break;
           case 7:
-            { anuncio("COMA"); guardoToken("COMA");
+            { return new Symbol(sym.COMA, yytext());
             }
             // fall through
           case 46: break;
           case 8:
-            { anuncio("RESTA"); guardoToken("RESTA");
+            { return new Symbol(sym.RESTA, yytext());
             }
             // fall through
           case 47: break;
           case 9:
-            { anuncio("DIVIDE"); guardoToken("DIVIDE");
+            { return new Symbol(sym.DIVIDE, yytext());
             }
             // fall through
           case 48: break;
           case 10:
-            { anuncio("CONST_INT");					
-								if (!checkInt(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
+            { if (!checkInt(yytext())) {
+									anunciarError("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
 								} else {
-									guardoToken("CONST_INT");
+									return new Symbol(sym.CONST_INT, yytext());
 								}
             }
             // fall through
           case 49: break;
           case 11:
-            { anuncio("PUNTO_COMA"); guardoToken("PUNTO_COMA");
+            { return new Symbol(sym.PUNTO_COMA, yytext());
             }
             // fall through
           case 50: break;
           case 12:
-            { anuncio("MENOR"); guardoToken("MENOR");
+            { return new Symbol(sym.MENOR, yytext());
             }
             // fall through
           case 51: break;
           case 13:
-            { anuncio("MAYOR"); guardoToken("MAYOR");
+            { return new Symbol(sym.MAYOR, yytext());
             }
             // fall through
           case 52: break;
           case 14:
-            { anuncio("ID_VAR"); guardoToken("ID_VAR");
+            { return new Symbol(sym.ID_VAR, yytext());
             }
             // fall through
           case 53: break;
           case 15:
-            { anuncio("COR_ABRE"); guardoToken("COR_ABRE");
+            { return new Symbol(sym.COR_ABRE, yytext());
             }
             // fall through
           case 54: break;
           case 16:
-            { anuncio("COR_CIERRA"); guardoToken("COR_CIERRA");
+            { return new Symbol(sym.COR_CIERRA, yytext());
             }
             // fall through
           case 55: break;
           case 17:
-            { anuncio("LLAVE_ABRE"); guardoToken("LLAVE_ABRE");
+            { return new Symbol(sym.LLAVE_ABRE, yytext());
             }
             // fall through
           case 56: break;
           case 18:
-            { anuncio("LLAVE_CIERRA"); guardoToken("LLAVE_CIERRA");
+            { return new Symbol(sym.LLAVE_CIERRA, yytext());
             }
             // fall through
           case 57: break;
           case 19:
             { anuncio("CONST_STR");
 								if (!checkStr(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
+									anunciarError("Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
 								} else {
-									guardoToken("CONST_STR");
+									return new Symbol(sym.CONST_STR, yytext());
 								}
             }
             // fall through
@@ -1059,75 +1059,75 @@ public class Lexico implements java_cup.runtime.Scanner {
           case 20:
             { anuncio("CONST_FLOAT");
 								if (!checkFloat(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
+									anunciarError("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
 								} else {
-									guardoToken("CONST_FLOAT");
+									return new Symbol(sym.CONST_FLOAT, yytext());
 								}
             }
             // fall through
           case 59: break;
           case 21:
-            { anuncio("ASIGNA_TIPO"); guardoToken("ASIGNA_TIPO");
+            { return new Symbol(sym.ASIGNA_TIPO, yytext());
             }
             // fall through
           case 60: break;
           case 22:
-            { anuncio("MENOR_IGUAL"); guardoToken("MENOR_IGUAL");
+            { return new Symbol(sym.MENOR_IGUAL, yytext());
             }
             // fall through
           case 61: break;
           case 23:
-            { anuncio("DISTINTO"); guardoToken("DISTINTO");
+            { return new Symbol(sym.DISTINTO, yytext());
             }
             // fall through
           case 62: break;
           case 24:
-            { anuncio("IGUAL"); guardoToken("IGUAL");
+            { return new Symbol(sym.IGUAL, yytext());
             }
             // fall through
           case 63: break;
           case 25:
-            { anuncio("MAYOR_IGUAL"); guardoToken("MAYOR_IGUAL");
+            { return new Symbol(sym.MAYOR_IGUAL, yytext());
             }
             // fall through
           case 64: break;
           case 26:
-            { anuncio("IF"); guardoToken("IF");
+            { return new Symbol(sym.IF, yytext());
             }
             // fall through
           case 65: break;
           case 27:
-            { anuncio("OR"); guardoToken("OR");
+            { return new Symbol(sym.OR, yytext());
             }
             // fall through
           case 66: break;
           case 28:
-            { anuncio("ASIGNA_VAR"); guardoToken("ASIGNA_VAR");
+            { return new Symbol(sym.ASIGNA_VAR, yytext());
             }
             // fall through
           case 67: break;
           case 29:
-            { anuncio("AND"); guardoToken("AND");
+            { return new Symbol(sym.AND, yytext());
             }
             // fall through
           case 68: break;
           case 30:
-            { anuncio("TIPO_DATO"); guardoToken("TIPO_DATO");
+            { return new Symbol(sym.TIPO_DATO, yytext());
             }
             // fall through
           case 69: break;
           case 31:
-            { anuncio("ELSE"); guardoToken("ELSE");
+            { return new Symbol(sym.ELSE, yytext());
             }
             // fall through
           case 70: break;
           case 32:
-            { anuncio("WHILE"); guardoToken("WHILE");
+            { return new Symbol(sym.WHILE, yytext());
             }
             // fall through
           case 71: break;
           case 33:
-            { anuncio("WRITE"); guardoToken("WRITE");
+            { return new Symbol(sym.WRITE, yytext());
             }
             // fall through
           case 72: break;
@@ -1137,27 +1137,27 @@ public class Lexico implements java_cup.runtime.Scanner {
             // fall through
           case 73: break;
           case 35:
-            { anuncio("POSITION"); guardoToken("POSITION");
+            { return new Symbol(sym.POSITION, yytext());
             }
             // fall through
           case 74: break;
           case 36:
-            { anuncio("SEC_COMIENZO"); guardoToken("SEC_COMIENZO");
+            { return new Symbol(sym.SEC_COMIENZO, yytext());
             }
             // fall through
           case 75: break;
           case 37:
-            { anuncio("PROG_COMIENZO"); guardoToken("PROG_COMIENZO");
+            { return new Symbol(sym.PROG_COMIENZO, yytext());
             }
             // fall through
           case 76: break;
           case 38:
-            { anuncio("SEC_FIN"); guardoToken("SEC_FIN");
+            { return new Symbol(sym.SEC_FIN, yytext());
             }
             // fall through
           case 77: break;
           case 39:
-            { anuncio("PROG_FIN"); guardoToken("PROG_FIN");
+            { return new Symbol(sym.PROG_FIN, yytext());
             }
             // fall through
           case 78: break;

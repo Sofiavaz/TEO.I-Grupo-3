@@ -6,6 +6,7 @@ package modelo;
 import jflex.core.sym; // Necesario para el método next_token(). 
 import java.util.ArrayList;
 import vista.Vista;
+import java_cup.runtime.*;
 
 
 /* ------------------------------------------------------------------ */
@@ -229,64 +230,63 @@ OR = [Oo][Rr]
 <YYINITIAL> {
 	{COMENTARIO_DOBLE}		{}
 	{COMENTARIO_SIMPLE}		{}
-    {DECLARE}				{anuncio("SEC_COMIENZO"); guardoToken("SEC_COMIENZO");}
-    {ENDDECLARE}			{anuncio("SEC_FIN"); guardoToken("SEC_FIN");}
-    {PROGRAM}				{anuncio("PROG_COMIENZO"); guardoToken("PROG_COMIENZO");}
-    {ENDPROGRAM}			{anuncio("PROG_FIN"); guardoToken("PROG_FIN");}
-    {POSITION}				{anuncio("POSITION"); guardoToken("POSITION");}
-    {WRITE}					{anuncio("WRITE"); guardoToken("WRITE");}
-    {IF}					{anuncio("IF"); guardoToken("IF");}
-    {ELSE}					{anuncio("ELSE"); guardoToken("ELSE");}
-    {WHILE}					{anuncio("WHILE"); guardoToken("WHILE");}
-    {TIPO_DATO}				{anuncio("TIPO_DATO"); guardoToken("TIPO_DATO");}
-	"::="					{anuncio("ASIGNA_VAR"); guardoToken("ASIGNA_VAR");}
-	":="					{anuncio("ASIGNA_TIPO"); guardoToken("ASIGNA_TIPO");}
-    "=="					{anuncio("IGUAL"); guardoToken("IGUAL");}
-    "<>"					{anuncio("DISTINTO"); guardoToken("DISTINTO");}
-    "<"						{anuncio("MENOR"); guardoToken("MENOR");}
-    "<="					{anuncio("MENOR_IGUAL"); guardoToken("MENOR_IGUAL");}
-    ">"						{anuncio("MAYOR"); guardoToken("MAYOR");}
-    ">="					{anuncio("MAYOR_IGUAL"); guardoToken("MAYOR_IGUAL");}
-    {AND}					{anuncio("AND"); guardoToken("AND");}
-    {OR}					{anuncio("OR"); guardoToken("OR");}
-    "+"						{anuncio("SUMA"); guardoToken("SUMA");}
-    "-"						{anuncio("RESTA"); guardoToken("RESTA");}
-    "("						{anuncio("PAR_ABRE"); guardoToken("PAR_ABRE");}
-	")"						{anuncio("PAR_CIERRA"); guardoToken("PAR_CIERRA");}
-    "{"						{anuncio("LLAVE_ABRE"); guardoToken("LLAVE_ABRE");}
-    "}"						{anuncio("LLAVE_CIERRA"); guardoToken("LLAVE_CIERRA");}
-    "["						{anuncio("COR_ABRE"); guardoToken("COR_ABRE");}
-    "]"						{anuncio("COR_CIERRA"); guardoToken("COR_CIERRA");}
-    ";"						{anuncio("PUNTO_COMA"); guardoToken("PUNTO_COMA");}
-    ","						{anuncio("COMA"); guardoToken("COMA");}
-	{ID_VAR}				{anuncio("ID_VAR"); guardoToken("ID_VAR");}
+    {DECLARE}				{return new Symbol(sym.SEC_COMIENZO, yytext());}
+    {ENDDECLARE}			{return new Symbol(sym.SEC_FIN, yytext());}
+    {PROGRAM}				{return new Symbol(sym.PROG_COMIENZO, yytext());}
+    {ENDPROGRAM}			{return new Symbol(sym.PROG_FIN, yytext());}
+    {POSITION}				{return new Symbol(sym.POSITION, yytext());}
+    {WRITE}					{return new Symbol(sym.WRITE, yytext());}
+    {IF}					{return new Symbol(sym.IF, yytext());}
+    {ELSE}					{return new Symbol(sym.ELSE, yytext());}
+    {WHILE}					{return new Symbol(sym.WHILE, yytext());}
+    {TIPO_DATO}				{return new Symbol(sym.TIPO_DATO, yytext());}
+	"::="					{return new Symbol(sym.ASIGNA_VAR, yytext());}
+	":="					{return new Symbol(sym.ASIGNA_TIPO, yytext());}
+    "=="					{return new Symbol(sym.IGUAL, yytext());}
+    "<>"					{return new Symbol(sym.DISTINTO, yytext());}
+    "<"						{return new Symbol(sym.MENOR, yytext());}
+    "<="					{return new Symbol(sym.MENOR_IGUAL, yytext());}
+    ">"						{return new Symbol(sym.MAYOR, yytext());}
+    ">="					{return new Symbol(sym.MAYOR_IGUAL, yytext());}
+    {AND}					{return new Symbol(sym.AND, yytext());}
+    {OR}					{return new Symbol(sym.OR, yytext());}
+    "+"						{return new Symbol(sym.SUMA, yytext());}
+    "-"						{return new Symbol(sym.RESTA, yytext());}
+    "("						{return new Symbol(sym.PAR_ABRE, yytext());}
+	")"						{return new Symbol(sym.PAR_CIERRA, yytext());}
+    "{"						{return new Symbol(sym.LLAVE_ABRE, yytext());}
+    "}"						{return new Symbol(sym.LLAVE_CIERRA, yytext());}
+    "["						{return new Symbol(sym.COR_ABRE, yytext());}
+    "]"						{return new Symbol(sym.COR_CIERRA, yytext());}
+    ";"						{return new Symbol(sym.PUNTO_COMA, yytext());}
+    ","						{return new Symbol(sym.COMA, yytext());}
+	{ID_VAR}				{return new Symbol(sym.ID_VAR, yytext());}
 	{CONST_INT}				{
-								anuncio("CONST_INT");					
 								if (!checkInt(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
+									anunciarError("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
 								} else {
-									guardoToken("CONST_INT");
+									return new Symbol(sym.CONST_INT, yytext());
 								}
 							}
 	{CONST_FLOAT}			{
 								anuncio("CONST_FLOAT");
 								if (!checkFloat(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
+									anunciarError("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
 								} else {
-									guardoToken("CONST_FLOAT");
+									return new Symbol(sym.CONST_FLOAT, yytext());
 								}
 							}
 	{CONST_STR}				{
 								anuncio("CONST_STR");
 								if (!checkStr(yytext())) {
-									vista.agregarLinea("Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
+									anunciarError("Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
 								} else {
-									guardoToken("CONST_STR");
+									return new Symbol(sym.CONST_STR, yytext());
 								}
 							}
 	{ESPACIO}				{/* no hacer nada */}
-	"/"						{anuncio("DIVIDE"); guardoToken("DIVIDE");}
-	"*"						{anuncio("MULTIPLICA"); guardoToken("MULTIPLICA");}
+	"/"						{return new Symbol(sym.DIVIDE, yytext());}
+	"*"						{return new Symbol(sym.MULTIPLICA, yytext());}
 } // Fin <YYINITIAL>.
 
 [^]	{anunciarError("Lexema '" + yytext() + "' no permitido, en la línea " + this.yyline + ", y columna " + this.yycolumn + ".");}
