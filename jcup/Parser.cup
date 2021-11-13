@@ -1,7 +1,12 @@
 /* Imports. */
+package modelo;
 import java_cup.runtime.*;
 
 parser code {:
+  public void syntax_error(Symbol s) {
+    System.err.println("Error en línea " + (s.right + 1) + ", columna " + s.left + ". "
+    + s + " no reconocido, con valor " + s.value);
+  }
 :}
 
 action code
@@ -18,115 +23,122 @@ terminal SUMA, RESTA, DIVIDE, MULTIPLICA;
 terminal PAR_ABRE, PAR_CIERRA, LLAVE_ABRE, LLAVE_CIERRA, COR_ABRE, COR_CIERRA, PUNTO_COMA, COMA;
 
 /* Símbolos no terminales. */
-non terminal <programa>, <seccion_de_declaraciones>, <seccion_de_programa>;
-non terminal <declaraciones>, <declaracion>, <otros_tipos>;
-non terminal <conjunto_de_sentencias>, <sentencia>, <asignacion>, <seleccion>, <iteracion>, <write>, <else>;
-non terminal <condicion>, <comparacion_numerica>, <comparacion_de_cadenas>, <expresion>, <comparador>, <expresion_string>;
-non terminal <termino>, <factor>;
-non terminal <position>, <lista_enteros>, <mas_enteros>;
+non terminal programa, seccion_de_declaraciones, seccion_de_programa;
+non terminal declaraciones, declaracion, otros_tipos;
+non terminal conjunto_de_sentencias, sentencia, asignacion, seleccion, iteracion, nt_write, else;
+non terminal condicion, comparacion, expresion, comparador;
+non terminal termino, factor;
+non terminal position, lista_enteros, mas_enteros;
 
 /* Símbolo distinguido. */
-start with <programa>;
+start with programa;
 
 /* GLC */
-<programa> ::= <seccion_de_declaraciones> <seccion_de_programa>
+programa ::= seccion_de_declaraciones seccion_de_programa {: System.out.println("Regla 0: programa ::= seccion_de_declaraciones seccion_de_programa."); :};
 
-<seccion_de_declaraciones> ::= SEC_COMIENZO <declaraciones> SEC_FIN
+seccion_de_declaraciones ::= SEC_COMIENZO declaraciones SEC_FIN {: System.out.println("Regla 1: seccion_de_declaraciones ::= SEC_COMIENZO declaraciones SEC_FIN."); :};
 
-<declaraciones> ::=
-  <declaracion> <declaraciones>
-  | <declaracion>
+declaraciones ::=
+  declaracion declaraciones {: System.out.println("Regla 2: declaraciones ::= declaracion declaraciones."); :}
+  | declaracion {: System.out.println("Regla 3: declaraciones ::= declaracion."); :}
+;
 
-<declaracion> ::= COR_ABRE ID_VAR <otros_tipos> TIPO_DATO COR_CIERRA
+declaracion ::= COR_ABRE ID_VAR otros_tipos TIPO_DATO COR_CIERRA {: System.out.println("Regla 4: declaracion ::= COR_ABRE ID_VAR otros_tipos TIPO_DATO COR_CIERRA."); :};
 
-<otros_tipos> ::=
-  COMA ID_VAR <otros_tipos> TIPO_DATO COMA
-  | COR_CIERRA ASIGNA_TIPO COR_ABRE
+otros_tipos ::=
+  COMA ID_VAR otros_tipos TIPO_DATO COMA {: System.out.println("Regla 5: otros_tipos ::= COMA ID_VAR otros_tipos TIPO_DATO COMA."); :}
+  | COR_CIERRA ASIGNA_TIPO COR_ABRE {: System.out.println("Regla 6: otros_tipos ::= COR_CIERRA ASIGNA_TIPO COR_ABRE."); :}
+;
 
-<seccion_de_programa> ::= PROG_COMIENZO <conjunto_de_sentencias> PROG_FIN
+seccion_de_programa ::= PROG_COMIENZO conjunto_de_sentencias PROG_FIN {: System.out.println("Regla 7: seccion_de_programa ::= PROG_COMIENZO conjunto_de_sentencias PROG_FIN."); :};
 
-<conjunto_de_sentencias> ::=
-  <sentencia> <conjunto_de_sentencias>
-  | <sentencia>
+conjunto_de_sentencias ::=
+  sentencia conjunto_de_sentencias {: System.out.println("Regla 8: conjunto_de_sentencias ::= sentencia conjunto_de_sentencias."); :}
+  | sentencia {: System.out.println("Regla 9: conjunto_de_sentencias ::= sentencia."); :}
+;
 
-<sentencia> ::=
-	<asignacion>
-	| <seleccion>
-	| <iteracion>
-	| <write>
+sentencia ::=
+	asignacion {: System.out.println("Regla 10: sentencia ::= asignacion."); :}
+	| seleccion {: System.out.println("Regla 11: sentencia ::= seleccion."); :}
+	| iteracion {: System.out.println("Regla 12: sentencia ::= iteracion."); :}
+	| nt_write {: System.out.println("Regla 13: sentencia ::= nt_write."); :}
+;
 
-<write> ::=
-  WRITE ID_VAR PUNTO_COMA
-  | WRITE CONST_FLOAT
-  | WRITE CONST_INT
-  | WRITE CONST_STR
-  | WRITE <position>
+nt_write ::=
+  WRITE ID_VAR PUNTO_COMA {: System.out.println("Regla 14: nt_write ::= WRITE ID_VAR PUNTO_COMA."); :}
+  | WRITE CONST_FLOAT PUNTO_COMA {: System.out.println("Regla 15: nt_write ::= WRITE CONST_FLOAT PUNTO_COMA."); :}
+  | WRITE CONST_INT PUNTO_COMA {: System.out.println("Regla 16: nt_write ::= WRITE CONST_INT PUNTO_COMA."); :}
+  | WRITE CONST_STR PUNTO_COMA {: System.out.println("Regla 17: nt_write ::= WRITE CONST_STR PUNTO_COMA."); :}
+  | WRITE position PUNTO_COMA {: System.out.println("Regla 18: nt_write ::= WRITE position PUNTO_COMA."); :}
+;
 
-<asignacion> ::=
-  ID_VAR ASIGNA_VAR <expresion> PUNTO_COMA
-  | ID_VAR ASIGNA_VAR CONST_STR PUNTO_COMA
+asignacion ::=
+  ID_VAR ASIGNA_VAR expresion PUNTO_COMA {: System.out.println("Regla 19: asignacion ::= ID_VAR ASIGNA_VAR expresion PUNTO_COMA."); :}
+  | ID_VAR ASIGNA_VAR CONST_STR PUNTO_COMA {: System.out.println("Regla 20: asignacion ::= ID_VAR ASIGNA_VAR CONST_STR PUNTO_COMA."); :}
+;
 
-<seleccion> ::=
-  IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE <declaraciones> LLAVE_CIERRA
-  | IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE <declaraciones> LLAVE_CIERRA <else>
-  | IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA
-  | IF PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA <else>
+seleccion ::=
+  IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA {: System.out.println("Regla 21: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA."); :}
+  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA else {: System.out.println("Regla 22: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA else."); :}
+  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA {: System.out.println("Regla 23: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA."); :}
+  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA else {: System.out.println("Regla 24: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA else."); :}
+;
 
-<else> ::=
-  ELSE <seleccion>
-  | ELSE LLAVE_ABRE <declaraciones> LLAVE_CIERRA
+else ::=
+  ELSE seleccion {: System.out.println("Regla 25: else ::= ELSE seleccion."); :}
+  | ELSE LLAVE_ABRE declaraciones LLAVE_CIERRA {: System.out.println("Regla 26: else ::= ELSE LLAVE_ABRE declaraciones LLAVE_CIERRA."); :}
+;
 
-<iteracion> ::= WHILE PAR_ABRE <condicion> PAR_CIERRA LLAVE_ABRE <declaraciones> LLAVE_CIERRA
+iteracion ::= WHILE PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA {: System.out.println("Regla 27: iteracion ::= WHILE PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA."); :};
 
-<condicion> ::=
-  <comparacion_numerica>
-  | <comparacion_de_cadenas>
-  | <comparacion_numerica> AND <comparacion_numerica>
-  | <comparacion_de_cadenas> AND <comparacion_de_cadenas>
-  | <comparacion_numerica> OR <comparacion_numerica>
-  | <comparacion_de_cadenas> OR <comparacion_de_cadenas>
+condicion ::=
+  comparacion {: System.out.println("Regla 28: condicion ::= comparacion."); :}
+  | comparacion AND comparacion {: System.out.println("Regla 29: condicion ::= comparacion AND comparacion."); :}
+  | comparacion OR comparacion {: System.out.println("Regla 30: condicion ::= comparacion OR comparacion."); :}
+;
 
-<comparacion_numerica> ::= <expresion> <comparador> <expresion>
+comparacion ::= expresion comparador expresion {: System.out.println("Regla 31: comparacion ::= expresion comparador expresion."); :};
 
-<comparacion_de_cadenas> ::= <expresion_string> <comparador> <expresion_string>
+comparador ::=
+  IGUAL {: System.out.println("Regla 32: comparador ::= IGUAL."); :}
+  | MAYOR {: System.out.println("Regla 33: comparador ::= MAYOR."); :}
+  | MAYOR_IGUAL {: System.out.println("Regla 34: comparador ::= MAYOR_IGUAL."); :}
+  | MENOR {: System.out.println("Regla 35: comparador ::= MENOR."); :}
+  | MENOR_IGUAL {: System.out.println("Regla 36: comparador ::= MENOR_IGUAL."); :}
+  | DISTINTO {: System.out.println("Regla 37: comparador ::= DISTINTO."); :}
+;
 
-<comparador> ::=
-  IGUAL
-  | MAYOR
-  | MAYOR_IGUAL
-  | MENOR
-  | MENOR_IGUAL
-  | DISTINTO
+expresion ::=
+  expresion SUMA termino {: System.out.println("Regla 38: expresion ::= expresion SUMA termino."); :}
+  | expresion RESTA termino {: System.out.println("Regla 39: expresion ::= expresion RESTA termino."); :}
+  | termino {: System.out.println("Regla 40: expresion ::= termino."); :}
+;
 
-<expresion_string> ::=
-  ID_VAR
-  | CONST_STR
+termino ::=
+  termino DIVIDE factor {: System.out.println("Regla 41: termino ::= termino DIVIDE factor."); :}
+  | termino MULTIPLICA factor {: System.out.println("Regla 42: termino ::= termino MULTIPLICA factor."); :}
+  | factor {: System.out.println("Regla 43: termino ::= factor."); :}
+;
 
-<expresion> ::=
-  <expresion> SUMA <termino>
-  | <expresion> RESTA <termino>
-  | <termino>
+factor ::=
+  ID_VAR {: System.out.println("Regla 44: factor ::= ID_VAR."); :}
+  | CONST_FLOAT {: System.out.println("Regla 45: factor ::= CONST_FLOAT."); :}
+  | CONST_INT {: System.out.println("Regla 46: factor ::= CONST_INT."); :}
+  | position {: System.out.println("Regla 47: factor ::= position."); :}
+  | PAR_ABRE expresion PAR_CIERRA {: System.out.println("Regla 48: factor ::= PAR_ABRE expresion PAR_CIERRA."); :}
+;
 
-<termino> ::=
-  <termino> DIVIDE <factor>
-  | <termino> MULTIPLICA <factor>
-  | <factor>
+position ::=
+  POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE lista_enteros COR_CIERRA PAR_CIERRA {: System.out.println("Regla 49: position ::= POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE lista_enteros COR_CIERRA PAR_CIERRA."); :}
+  | POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA {: System.out.println("Regla 50: position ::= POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA."); :}
+;
 
-<factor> ::=
-  ID_VAR
-  | CONST_FLOAT
-  | CONST_INT
-  | <position>
-  | PAR_ABRE <expresion> PAR_CIERRA
+lista_enteros ::=
+  CONST_INT mas_enteros {: System.out.println("Regla 51: lista_enteros ::= CONST_INT mas_enteros."); :}
+  | CONST_INT {: System.out.println("Regla 52: lista_enteros ::= CONST_INT."); :}
+;
 
-<position> ::=
-  POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE <lista_enteros> COR_CIERRA PAR_CIERRA
-  | POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA PUNTO_COMA
-
-<lista_enteros> ::=
-  CONST_INT <mas_enteros>
-  | CONST_INT
-
-<mas_enteros> ::=
-  COMA CONST_INT <mas_enteros>
-  | COMA CONST_INT
+mas_enteros ::=
+  COMA CONST_INT mas_enteros {: System.out.println("Regla 53: mas_enteros ::= COMA CONST_INT mas_enteros."); :}
+  | COMA CONST_INT {: System.out.println("Regla 54: mas_enteros ::= COMA CONST_INT."); :}
+;

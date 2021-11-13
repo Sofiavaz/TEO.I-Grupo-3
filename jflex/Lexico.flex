@@ -2,8 +2,7 @@
 /* Importaciones */
 /* ------------------------------------------------------------------ */
 
-package modelo;
-import jflex.core.sym; // Necesario para el método next_token(). 
+package modelo; 
 import java.util.ArrayList;
 import vista.Vista;
 import java_cup.runtime.*;
@@ -107,6 +106,12 @@ import java_cup.runtime.*;
 			vista.agregarLinea("\tToken = " + token + "\n\tLexema = '" + yytext() + "'\n");
 		else
 			vista.agregarLinea("\tToken = " + token + "\n\tLexema = " + yytext() + "\n");	
+	}
+	
+	// Devuelve el valor de símbolo apropiado.
+	private Symbol nuevoSimbolo(int codigoSimbolo) {
+		anuncio(sym.terminalNames[codigoSimbolo]);
+		return new Symbol(codigoSimbolo, yytext());
 	}
 	
 	// Comunica que se encontró un lexema inválido.
@@ -228,65 +233,65 @@ OR = [Oo][Rr]
 /* ------------------------------------------------------------------ */
 
 <YYINITIAL> {
-	{COMENTARIO_DOBLE}		{}
-	{COMENTARIO_SIMPLE}		{}
-    {DECLARE}				{return new Symbol(sym.SEC_COMIENZO, yytext());}
-    {ENDDECLARE}			{return new Symbol(sym.SEC_FIN, yytext());}
-    {PROGRAM}				{return new Symbol(sym.PROG_COMIENZO, yytext());}
-    {ENDPROGRAM}			{return new Symbol(sym.PROG_FIN, yytext());}
-    {POSITION}				{return new Symbol(sym.POSITION, yytext());}
-    {WRITE}					{return new Symbol(sym.WRITE, yytext());}
-    {IF}					{return new Symbol(sym.IF, yytext());}
-    {ELSE}					{return new Symbol(sym.ELSE, yytext());}
-    {WHILE}					{return new Symbol(sym.WHILE, yytext());}
-    {TIPO_DATO}				{return new Symbol(sym.TIPO_DATO, yytext());}
-	"::="					{return new Symbol(sym.ASIGNA_VAR, yytext());}
-	":="					{return new Symbol(sym.ASIGNA_TIPO, yytext());}
-    "=="					{return new Symbol(sym.IGUAL, yytext());}
-    "<>"					{return new Symbol(sym.DISTINTO, yytext());}
-    "<"						{return new Symbol(sym.MENOR, yytext());}
-    "<="					{return new Symbol(sym.MENOR_IGUAL, yytext());}
-    ">"						{return new Symbol(sym.MAYOR, yytext());}
-    ">="					{return new Symbol(sym.MAYOR_IGUAL, yytext());}
-    {AND}					{return new Symbol(sym.AND, yytext());}
-    {OR}					{return new Symbol(sym.OR, yytext());}
-    "+"						{return new Symbol(sym.SUMA, yytext());}
-    "-"						{return new Symbol(sym.RESTA, yytext());}
-    "("						{return new Symbol(sym.PAR_ABRE, yytext());}
-	")"						{return new Symbol(sym.PAR_CIERRA, yytext());}
-    "{"						{return new Symbol(sym.LLAVE_ABRE, yytext());}
-    "}"						{return new Symbol(sym.LLAVE_CIERRA, yytext());}
-    "["						{return new Symbol(sym.COR_ABRE, yytext());}
-    "]"						{return new Symbol(sym.COR_CIERRA, yytext());}
-    ";"						{return new Symbol(sym.PUNTO_COMA, yytext());}
-    ","						{return new Symbol(sym.COMA, yytext());}
-	{ID_VAR}				{return new Symbol(sym.ID_VAR, yytext());}
+	{COMENTARIO_DOBLE}		{/* No hace nada. */}
+	{COMENTARIO_SIMPLE}		{/* No hace nada. */}
+    {DECLARE}				{return nuevoSimbolo(sym.SEC_COMIENZO);}
+    {ENDDECLARE}			{return nuevoSimbolo(sym.SEC_FIN);}
+    {PROGRAM}				{return nuevoSimbolo(sym.PROG_COMIENZO);}
+    {ENDPROGRAM}			{return nuevoSimbolo(sym.PROG_FIN);}
+    {POSITION}				{return nuevoSimbolo(sym.POSITION);}
+    {WRITE}					{return nuevoSimbolo(sym.WRITE);}
+    {IF}					{return nuevoSimbolo(sym.IF);}
+    {ELSE}					{return nuevoSimbolo(sym.ELSE);}
+    {WHILE}					{return nuevoSimbolo(sym.WHILE);}
+    {TIPO_DATO}				{return nuevoSimbolo(sym.TIPO_DATO);}
+	"::="					{return nuevoSimbolo(sym.ASIGNA_VAR);}
+	":="					{return nuevoSimbolo(sym.ASIGNA_TIPO);}
+    "=="					{return nuevoSimbolo(sym.IGUAL);}
+    "<>"					{return nuevoSimbolo(sym.DISTINTO);}
+    "<"						{return nuevoSimbolo(sym.MENOR);}
+    "<="					{return nuevoSimbolo(sym.MENOR_IGUAL);}
+    ">"						{return nuevoSimbolo(sym.MAYOR);}
+    ">="					{return nuevoSimbolo(sym.MAYOR_IGUAL);}
+    {AND}					{return nuevoSimbolo(sym.AND);}
+    {OR}					{return nuevoSimbolo(sym.OR);}
+    "+"						{return nuevoSimbolo(sym.SUMA);}
+    "-"						{return nuevoSimbolo(sym.RESTA);}
+    "("						{return nuevoSimbolo(sym.PAR_ABRE);}
+	")"						{return nuevoSimbolo(sym.PAR_CIERRA);}
+    "{"						{return nuevoSimbolo(sym.LLAVE_ABRE);}
+    "}"						{return nuevoSimbolo(sym.LLAVE_CIERRA);}
+    "["						{return nuevoSimbolo(sym.COR_ABRE);}
+    "]"						{return nuevoSimbolo(sym.COR_CIERRA);}
+    ";"						{return nuevoSimbolo(sym.PUNTO_COMA);}
+    ","						{return nuevoSimbolo(sym.COMA);}
+	{ID_VAR}				{return nuevoSimbolo(sym.ID_VAR);}
 	{CONST_INT}				{
 								if (!checkInt(yytext())) {
-									anunciarError("Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
+									anunciarError("Lexer: Lexema " + yytext() + " excede el valor máximo de un Integer (" + INT_MAX_LEN + ").\n");	
 								} else {
-									return new Symbol(sym.CONST_INT, yytext());
+									return nuevoSimbolo(sym.CONST_INT);
 								}
 							}
 	{CONST_FLOAT}			{
 								anuncio("CONST_FLOAT");
 								if (!checkFloat(yytext())) {
-									anunciarError("Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
+									anunciarError("Lexer: Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
 								} else {
-									return new Symbol(sym.CONST_FLOAT, yytext());
+									return nuevoSimbolo(sym.CONST_FLOAT);
 								}
 							}
 	{CONST_STR}				{
 								anuncio("CONST_STR");
 								if (!checkStr(yytext())) {
-									anunciarError("Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
+									anunciarError("Lexer: Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
 								} else {
-									return new Symbol(sym.CONST_STR, yytext());
+									return nuevoSimbolo(sym.CONST_STR);
 								}
 							}
-	{ESPACIO}				{/* no hacer nada */}
-	"/"						{return new Symbol(sym.DIVIDE, yytext());}
-	"*"						{return new Symbol(sym.MULTIPLICA, yytext());}
+	{ESPACIO}				{/* No hace nada. */}
+	"/"						{return nuevoSimbolo(sym.DIVIDE);}
+	"*"						{return nuevoSimbolo(sym.MULTIPLICA);}
 } // Fin <YYINITIAL>.
 
-[^]	{anunciarError("Lexema '" + yytext() + "' no permitido, en la línea " + this.yyline + ", y columna " + this.yycolumn + ".");}
+[^]	{anunciarError("Lexer: Lexema '" + yytext() + "' no permitido, en la línea " + this.yyline + ", y columna " + this.yycolumn + ".");}

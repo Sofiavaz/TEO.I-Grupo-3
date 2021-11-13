@@ -2,6 +2,7 @@ package vista;
 
 import modelo.Lexico;
 import modelo.Token;
+import modelo.parser;
 
 import javax.swing.*;
 import java.awt.*;
@@ -130,12 +131,22 @@ public class Vista extends JFrame {
             lexer = new Lexico(reader);
             lexer.agregarVista(this);
             
+            @SuppressWarnings("deprecation")
+			parser miParser = new parser(lexer);
+            try {
+				miParser.parse();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+            
+            /*
             try {
 				lexer.next_token();
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(-1);
 			}
+			*/
         }
     }
     
