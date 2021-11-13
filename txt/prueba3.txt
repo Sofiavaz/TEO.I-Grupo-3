@@ -1,0 +1,11 @@
+declare.section
+  [miString, miInt, miFloat] := [String, int, float]
+enddeclare.section
+program.section
+  //* Si descomentamos la siguiente línea de código, *//
+  //* se genera error, porque la variable miVar no tiene *//
+  //* tipo definido. *//
+  //* miVar ::= 5; *//
+
+  miString ::= "Hola";
+endprogram.section

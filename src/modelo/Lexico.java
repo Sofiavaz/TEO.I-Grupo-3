@@ -8,7 +8,7 @@
 
 package modelo; 
 import java.util.ArrayList;
-import vista.Vista;
+import vista.VistaPrincipal;
 import java_cup.runtime.*;
 
 
@@ -407,7 +407,7 @@ public class Lexico implements java_cup.runtime.Scanner {
 	private final int STR_MAX_LEN = 32;  // Son 32 porque contamos las doble comillas de apertura y cierre.
 	private final int INT_MAX_LEN = 65536;
 	private ArrayList<Token> listaTokens = new ArrayList<Token>();
-	private Vista vista;
+	private VistaPrincipal vista;
 	
 	// Tabla de símbolos.
 	// private List<Map<Columna, String>> symtbl;
@@ -490,7 +490,7 @@ public class Lexico implements java_cup.runtime.Scanner {
 	
 	// Devuelve el valor de símbolo apropiado.
 	private Symbol nuevoSimbolo(int codigoSimbolo) {
-		anuncio(sym.terminalNames[codigoSimbolo]);
+		guardoToken(sym.terminalNames[codigoSimbolo]);
 		return new Symbol(codigoSimbolo, yytext());
 	}
 	
@@ -547,7 +547,7 @@ public class Lexico implements java_cup.runtime.Scanner {
 	}
 	
 	// Permite vincular una vista.
-	public void agregarVista(Vista actual) {
+	public void agregarVista(VistaPrincipal actual) {
 		vista = actual;
 	}
 
@@ -1052,8 +1052,7 @@ public class Lexico implements java_cup.runtime.Scanner {
             // fall through
           case 56: break;
           case 19:
-            { anuncio("CONST_STR");
-								if (!checkStr(yytext())) {
+            { if (!checkStr(yytext())) {
 									anunciarError("Lexer: Lexema " + yytext() + " excede la longitud máxima de un String (" + (STR_MAX_LEN - 2) + ").\n");		
 								} else {
 									return nuevoSimbolo(sym.CONST_STR);
@@ -1062,8 +1061,7 @@ public class Lexico implements java_cup.runtime.Scanner {
             // fall through
           case 57: break;
           case 20:
-            { anuncio("CONST_FLOAT");
-								if (!checkFloat(yytext())) {
+            { if (!checkFloat(yytext())) {
 									anunciarError("Lexer: Lexema " + yytext() + " está fuera de los rangos permitidos para un float.\n");	
 								} else {
 									return nuevoSimbolo(sym.CONST_FLOAT);

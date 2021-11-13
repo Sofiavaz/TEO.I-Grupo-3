@@ -1,0 +1,80 @@
+declare.section
+  [indice, posicion] := [int, int]
+enddeclare.section
+program.section
+  //* ASIGNACIONES *//
+  miVar ::= 50 + 3.5e-2 / miOtraVar;
+  miVar ::= 50 + 3.5e-2 / 3.4e10;
+  miVar ::= 50 + 3.5e-2 / 50;
+  miVar ::= 50 + 3.5e-2 / position(5; [2, 3, 5]);
+  miVar ::= miOtraVariable - 10;
+  miVar ::= 50 - 3.5e-2 / position(5; [2, 3, 5]);
+  miVar ::= 20.2;
+  miVar ::= "Hola";
+
+  //* SELECCION *//
+    //* Prueba de las condiciones. *//
+    if ((50 + 30) < 23) {}
+    if ((50 + 30) > 23) {}
+    if ((50 + 30) == 23) {}
+    if ((50 + 30) <> 23) {}
+    if ((50 + 30) <= 23) {}
+    if ((50 + 30) >= 23) {}
+    if ((50 + 30) < 23 AND 50 >= (2 + 3)) {}
+
+    //* Una selección sin else, y sin sentencias dentro. *//
+    if (3 < 4) {}
+
+    //* Una selección sin else, y con sentencias dentro. *//
+    if (3 < 4) {
+      miVar ::= "Mi String";
+    }
+
+    //* Una selección con else, y sin sentencias dentro. *//
+    if (3 < 4) {
+    } else {}
+
+    //* Una selección con else, y con sentencias dentro del else solamente. *//
+    if (3 < 4) {
+    } else {
+      miVar ::= "Mi String";
+    }
+
+    //* Una selección con else, y con sentencias dentro del if solamente. *//
+    if (3 < 4) {
+      miVar ::= "Mi String";
+    } else {
+    }
+
+    //* Una selección con else if, y sin sentencias dentro. *//
+    if (3 < 4) {
+    } else if (3 < 4) {
+    }
+
+    //* Una selección con else if y con else, y con sentencias dentro. *//
+    if (3 < 4) {
+      miVar ::= "Mi String";
+    } else if (3 < 4) {
+      miVar ::= "Mi String";
+    } else {
+      miVar ::= "Mi String";
+    }
+
+  //* ITERACION *//
+  indice ::= 0;
+  while (indice < 50) {
+    miVar ::= "Mi String";
+    indice ::= indice + 1;
+  }
+
+  //* SALIDA *//
+  write miVariable;
+  write 2.3;
+  write 23;
+  write "Hola";
+  write position(5; []);
+
+  //* POSITION *//
+  miVar ::= position(3; [1, 4, 8]);
+  miVar ::= position(3; []);
+endprogram.section

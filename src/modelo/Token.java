@@ -4,7 +4,6 @@ public class Token {
 	private String nombreToken;
 	private String nombreSimbolo;
 	private String lexema;
-	private static int sigValor;
 	
 	public Token(String nombreToken, String lexema) {
 		this.nombreToken = nombreToken;

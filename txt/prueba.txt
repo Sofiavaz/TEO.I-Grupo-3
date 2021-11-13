@@ -1,0 +1,36 @@
+declare.section
+  //* Dentro de DECLARE *//
+  [indice, posicion] := [int, int]
+enddeclare.section
+program.section
+  //* Dentro de PROGRAM *//
+
+  indice ::= 0;
+
+  while (indice < 0) {
+    //* Dentro del WHILE *//
+    write "Dentro del while";
+    indice ::= indice + 1;
+  }
+
+  posicion ::= position(5; [2, 3, 5]);
+  write "Posición: ";
+  write posicion;
+
+  posicion ::= position(5; []);
+  write "Posición: ";
+  write posicion;
+
+  numeroReal ::= 5.2e10;
+
+  if(numero == 5.2e5) {
+    //* Dentro del IF *//
+    write "Primero.";
+  } else if (numero == 2.3) {
+    //* Dentro del ELSE IF *//
+    write "Segundo.";
+  } else {
+    //* Dentro del ELSE *//
+    write "Tercero.";
+  }
+endprogram.section

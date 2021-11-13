@@ -1,16 +1,91 @@
 /* Imports. */
 package modelo;
+import vista.VistaPrincipal;
+import java.util.TreeMap;
+import java.util.LinkedList;
+import java.util.Stack;
 import java_cup.runtime.*;
 
 parser code {:
+  private VistaPrincipal vista;
+  private Tabla tabla;
+  private TreeMap paresIdTipo = new TreeMap<String, String>();
+  private LinkedList<String> colaIds;
+  private Stack<String> pilaTipos;
+
+  // Genera un error porque un identificador aparece más de
+  // una vez en las declaraciones de tipo.
+  private void errDeclIdDupl(String id) {
+    String msj = "\nEl identificador " + id + " aparece más de una"
+    + " vez en la sección de declaraciones.";
+
+    vista.agregarLinea(msj);
+    throw new Error(msj);
+  }
+
+  private void cargarTiposDeVariablesEnTabla() {
+    tabla.cargarTiposDeVariables(paresIdTipo);
+  }
+
+  // Vincula esta clase con una vista.
+  public void agregarVista(VistaPrincipal actual) {
+    vista = actual;
+  }
+
+  public void vincularTabla(Tabla tabla) {
+    this.tabla = vista.getTablaDeSimbolos();
+  }
+
   public void syntax_error(Symbol s) {
-    System.err.println("Error en línea " + (s.right + 1) + ", columna " + s.left + ". "
-    + s + " no reconocido, con valor " + s.value);
+    String msj = "\nError en línea " + s.right + ", columna " + s.left + ". "
+    + s + " no reconocido, con valor " + s.value;
+
+    vista.agregarLinea(msj);
+    throw new Error(msj);
   }
 :}
 
 action code
 {:
+  // Imprime las reglas encontradas en la ventana de la vista.
+  private void anuncio(String msj) {
+    vista.agregarLinea(msj);
+  }
+
+  private void inicializarPilaYCola() {
+    colaIds = new LinkedList<String>();
+    pilaTipos = new Stack<String>();
+  }
+
+  // Guarda los pares ID:Tipo que están en la cola y la pila,
+  // en el mapa paresIdTipo, si no hay duplicados.
+  // Si hay duplicados, genera un error.
+  private void procesarIdsYTipos() {
+    String idActual;
+    String tipoActual;
+
+    // Construye el mapa con los nombres de identificadores como
+    // clave, y los tipos como valores.
+    while (colaIds.size() > 0) {
+      idActual = colaIds.poll();
+      tipoActual = pilaTipos.pop();
+      if (paresIdTipo.containsKey(idActual))
+        errDeclIdDupl(idActual);
+      else
+        paresIdTipo.put(idActual, tipoActual);
+    }
+  }
+
+  // Verifica que el identificador tenga un tipo declarado.
+  // Si no lo tiene, genera un error.
+  private void verificarTipo(String identificador) {
+    if (!tabla.idEstaDeclarado(identificador)) {
+      String msj = "\nError: el identificador " + identificador + " no tiene tipo declarador.";
+
+      vista.agregarLinea(msj);
+      throw new Error(msj);
+    }
+  }
 :}
 
 /* Símbolos terminales. */
@@ -34,111 +109,159 @@ non terminal position, lista_enteros, mas_enteros;
 start with programa;
 
 /* GLC */
-programa ::= seccion_de_declaraciones seccion_de_programa {: System.out.println("Regla 0: programa ::= seccion_de_declaraciones seccion_de_programa."); :};
+programa ::= seccion_de_declaraciones seccion_de_programa {: anuncio("Regla 0: programa ::= seccion_de_declaraciones seccion_de_programa."); :};
 
-seccion_de_declaraciones ::= SEC_COMIENZO declaraciones SEC_FIN {: System.out.println("Regla 1: seccion_de_declaraciones ::= SEC_COMIENZO declaraciones SEC_FIN."); :};
+seccion_de_declaraciones ::=
+
+  SEC_COMIENZO declaraciones SEC_FIN
+  {:
+    anuncio("Regla 1: seccion_de_declaraciones ::= SEC_COMIENZO declaraciones SEC_FIN.");
+    tabla.cargarTiposDeVariables(paresIdTipo);
+  :}
+
+  | SEC_COMIENZO SEC_FIN {: anuncio("Regla 2: seccion_de_declaraciones ::= SEC_COMIENZO SEC_FIN."); :}
+;
 
 declaraciones ::=
-  declaracion declaraciones {: System.out.println("Regla 2: declaraciones ::= declaracion declaraciones."); :}
-  | declaracion {: System.out.println("Regla 3: declaraciones ::= declaracion."); :}
+  declaracion declaraciones {: anuncio("Regla 3: declaraciones ::= declaracion declaraciones."); :}
+  | declaracion {: anuncio("Regla 4: declaraciones ::= declaracion."); :}
 ;
 
-declaracion ::= COR_ABRE ID_VAR otros_tipos TIPO_DATO COR_CIERRA {: System.out.println("Regla 4: declaracion ::= COR_ABRE ID_VAR otros_tipos TIPO_DATO COR_CIERRA."); :};
+declaracion ::=
+  COR_ABRE ID_VAR:id otros_tipos TIPO_DATO:tipo COR_CIERRA
+  {:
+    anuncio("Regla 5: declaracion ::= COR_ABRE ID_VAR(" + id + ") otros_tipos TIPO_DATO(" + tipo + ") COR_CIERRA.");
+    colaIds.addLast((String) id);
+    pilaTipos.push((String) tipo);
+    procesarIdsYTipos();
+  :}
+;
 
 otros_tipos ::=
-  COMA ID_VAR otros_tipos TIPO_DATO COMA {: System.out.println("Regla 5: otros_tipos ::= COMA ID_VAR otros_tipos TIPO_DATO COMA."); :}
-  | COR_CIERRA ASIGNA_TIPO COR_ABRE {: System.out.println("Regla 6: otros_tipos ::= COR_CIERRA ASIGNA_TIPO COR_ABRE."); :}
+
+  COMA ID_VAR:id otros_tipos TIPO_DATO:tipo COMA
+  {:
+    anuncio("Regla 6: otros_tipos ::= COMA ID_VAR(" + id + ") otros_tipos TIPO_DATO(" + tipo + ") COMA.");
+    colaIds.addLast((String) id);
+    pilaTipos.push((String) tipo);
+  :}
+
+  | COR_CIERRA ASIGNA_TIPO COR_ABRE
+  {:
+    anuncio("Regla 7: otros_tipos ::= COR_CIERRA ASIGNA_TIPO COR_ABRE.");
+    inicializarPilaYCola();
+  :}
 ;
 
-seccion_de_programa ::= PROG_COMIENZO conjunto_de_sentencias PROG_FIN {: System.out.println("Regla 7: seccion_de_programa ::= PROG_COMIENZO conjunto_de_sentencias PROG_FIN."); :};
+seccion_de_programa ::= PROG_COMIENZO conjunto_de_sentencias PROG_FIN {: anuncio("Regla 8: seccion_de_programa ::= PROG_COMIENZO conjunto_de_sentencias PROG_FIN."); :};
 
 conjunto_de_sentencias ::=
-  sentencia conjunto_de_sentencias {: System.out.println("Regla 8: conjunto_de_sentencias ::= sentencia conjunto_de_sentencias."); :}
-  | sentencia {: System.out.println("Regla 9: conjunto_de_sentencias ::= sentencia."); :}
+  sentencia conjunto_de_sentencias {: anuncio("Regla 9: conjunto_de_sentencias ::= sentencia conjunto_de_sentencias."); :}
+  | sentencia {: anuncio("Regla 10: conjunto_de_sentencias ::= sentencia."); :}
 ;
 
 sentencia ::=
-	asignacion {: System.out.println("Regla 10: sentencia ::= asignacion."); :}
-	| seleccion {: System.out.println("Regla 11: sentencia ::= seleccion."); :}
-	| iteracion {: System.out.println("Regla 12: sentencia ::= iteracion."); :}
-	| nt_write {: System.out.println("Regla 13: sentencia ::= nt_write."); :}
+	asignacion {: anuncio("Regla 11: sentencia ::= asignacion."); :}
+	| seleccion {: anuncio("Regla 12: sentencia ::= seleccion."); :}
+	| iteracion {: anuncio("Regla 13: sentencia ::= iteracion."); :}
+	| nt_write {: anuncio("Regla 14: sentencia ::= nt_write."); :}
 ;
 
 nt_write ::=
-  WRITE ID_VAR PUNTO_COMA {: System.out.println("Regla 14: nt_write ::= WRITE ID_VAR PUNTO_COMA."); :}
-  | WRITE CONST_FLOAT PUNTO_COMA {: System.out.println("Regla 15: nt_write ::= WRITE CONST_FLOAT PUNTO_COMA."); :}
-  | WRITE CONST_INT PUNTO_COMA {: System.out.println("Regla 16: nt_write ::= WRITE CONST_INT PUNTO_COMA."); :}
-  | WRITE CONST_STR PUNTO_COMA {: System.out.println("Regla 17: nt_write ::= WRITE CONST_STR PUNTO_COMA."); :}
-  | WRITE position PUNTO_COMA {: System.out.println("Regla 18: nt_write ::= WRITE position PUNTO_COMA."); :}
+
+  WRITE ID_VAR:id PUNTO_COMA
+  {:
+    anuncio("Regla 15: nt_write ::= WRITE ID_VAR(" + id + ") PUNTO_COMA.");
+    verificarTipo((String) id);
+  :}
+
+  | WRITE CONST_FLOAT:constante PUNTO_COMA {: anuncio("Regla 16: nt_write ::= WRITE CONST_FLOAT(" + constante + ") PUNTO_COMA."); :}
+  | WRITE CONST_INT:constante PUNTO_COMA {: anuncio("Regla 17: nt_write ::= WRITE CONST_INT(" + constante + ") PUNTO_COMA."); :}
+  | WRITE CONST_STR:constante PUNTO_COMA {: anuncio("Regla 18: nt_write ::= WRITE CONST_STR(" + constante + ") PUNTO_COMA."); :}
+  | WRITE position PUNTO_COMA {: anuncio("Regla 19: nt_write ::= WRITE position PUNTO_COMA."); :}
 ;
 
 asignacion ::=
-  ID_VAR ASIGNA_VAR expresion PUNTO_COMA {: System.out.println("Regla 19: asignacion ::= ID_VAR ASIGNA_VAR expresion PUNTO_COMA."); :}
-  | ID_VAR ASIGNA_VAR CONST_STR PUNTO_COMA {: System.out.println("Regla 20: asignacion ::= ID_VAR ASIGNA_VAR CONST_STR PUNTO_COMA."); :}
+
+  ID_VAR:id ASIGNA_VAR expresion PUNTO_COMA
+  {:
+    anuncio("Regla 20: asignacion ::= ID_VAR(" + id + ") ASIGNA_VAR expresion PUNTO_COMA.");
+    verificarTipo((String) id);
+  :}
+
+  | ID_VAR:id ASIGNA_VAR CONST_STR:constante PUNTO_COMA
+  {:
+    anuncio("Regla 21: asignacion ::= ID_VAR(" + id + ") ASIGNA_VAR CONST_STR(" + constante + ") PUNTO_COMA.");
+    verificarTipo((String) id);
+  :}
 ;
 
 seleccion ::=
-  IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA {: System.out.println("Regla 21: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA."); :}
-  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA else {: System.out.println("Regla 22: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA else."); :}
-  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA {: System.out.println("Regla 23: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA."); :}
-  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA else {: System.out.println("Regla 24: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA else."); :}
+  IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA {: anuncio("Regla 22: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA."); :}
+  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA else {: anuncio("Regla 23: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA else."); :}
+  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA {: anuncio("Regla 24: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA."); :}
+  | IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA else {: anuncio("Regla 25: seleccion ::= IF PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE LLAVE_CIERRA else."); :}
 ;
 
 else ::=
-  ELSE seleccion {: System.out.println("Regla 25: else ::= ELSE seleccion."); :}
-  | ELSE LLAVE_ABRE declaraciones LLAVE_CIERRA {: System.out.println("Regla 26: else ::= ELSE LLAVE_ABRE declaraciones LLAVE_CIERRA."); :}
+  ELSE seleccion {: anuncio("Regla 26: else ::= ELSE seleccion."); :}
+  | ELSE LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA {: anuncio("Regla 27: else ::= ELSE LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA."); :}
+  | ELSE LLAVE_ABRE LLAVE_CIERRA {: anuncio("Regla 28: else ::= ELSE LLAVE_ABRE LLAVE_CIERRA."); :}
 ;
 
-iteracion ::= WHILE PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA {: System.out.println("Regla 27: iteracion ::= WHILE PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE declaraciones LLAVE_CIERRA."); :};
+iteracion ::= WHILE PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA {: anuncio("Regla 29: iteracion ::= WHILE PAR_ABRE condicion PAR_CIERRA LLAVE_ABRE conjunto_de_sentencias LLAVE_CIERRA."); :};
 
 condicion ::=
-  comparacion {: System.out.println("Regla 28: condicion ::= comparacion."); :}
-  | comparacion AND comparacion {: System.out.println("Regla 29: condicion ::= comparacion AND comparacion."); :}
-  | comparacion OR comparacion {: System.out.println("Regla 30: condicion ::= comparacion OR comparacion."); :}
+  comparacion {: anuncio("Regla 30: condicion ::= comparacion."); :}
+  | comparacion AND comparacion {: anuncio("Regla 31: condicion ::= comparacion AND comparacion."); :}
+  | comparacion OR comparacion {: anuncio("Regla 32: condicion ::= comparacion OR comparacion."); :}
 ;
 
-comparacion ::= expresion comparador expresion {: System.out.println("Regla 31: comparacion ::= expresion comparador expresion."); :};
+comparacion ::= expresion comparador expresion {: anuncio("Regla 33: comparacion ::= expresion comparador expresion."); :};
 
 comparador ::=
-  IGUAL {: System.out.println("Regla 32: comparador ::= IGUAL."); :}
-  | MAYOR {: System.out.println("Regla 33: comparador ::= MAYOR."); :}
-  | MAYOR_IGUAL {: System.out.println("Regla 34: comparador ::= MAYOR_IGUAL."); :}
-  | MENOR {: System.out.println("Regla 35: comparador ::= MENOR."); :}
-  | MENOR_IGUAL {: System.out.println("Regla 36: comparador ::= MENOR_IGUAL."); :}
-  | DISTINTO {: System.out.println("Regla 37: comparador ::= DISTINTO."); :}
+  IGUAL {: anuncio("Regla 34: comparador ::= IGUAL."); :}
+  | MAYOR {: anuncio("Regla 35: comparador ::= MAYOR."); :}
+  | MAYOR_IGUAL {: anuncio("Regla 36: comparador ::= MAYOR_IGUAL."); :}
+  | MENOR {: anuncio("Regla 37: comparador ::= MENOR."); :}
+  | MENOR_IGUAL {: anuncio("Regla 38: comparador ::= MENOR_IGUAL."); :}
+  | DISTINTO {: anuncio("Regla 39: comparador ::= DISTINTO."); :}
 ;
 
 expresion ::=
-  expresion SUMA termino {: System.out.println("Regla 38: expresion ::= expresion SUMA termino."); :}
-  | expresion RESTA termino {: System.out.println("Regla 39: expresion ::= expresion RESTA termino."); :}
-  | termino {: System.out.println("Regla 40: expresion ::= termino."); :}
+  expresion SUMA termino {: anuncio("Regla 40: expresion ::= expresion SUMA termino."); :}
+  | expresion RESTA termino {: anuncio("Regla 41: expresion ::= expresion RESTA termino."); :}
+  | termino {: anuncio("Regla 42: expresion ::= termino."); :}
 ;
 
 termino ::=
-  termino DIVIDE factor {: System.out.println("Regla 41: termino ::= termino DIVIDE factor."); :}
-  | termino MULTIPLICA factor {: System.out.println("Regla 42: termino ::= termino MULTIPLICA factor."); :}
-  | factor {: System.out.println("Regla 43: termino ::= factor."); :}
+  termino DIVIDE factor {: anuncio("Regla 43: termino ::= termino DIVIDE factor."); :}
+  | termino MULTIPLICA factor {: anuncio("Regla 44: termino ::= termino MULTIPLICA factor."); :}
+  | factor {: anuncio("Regla 45: termino ::= factor."); :}
 ;
 
 factor ::=
-  ID_VAR {: System.out.println("Regla 44: factor ::= ID_VAR."); :}
-  | CONST_FLOAT {: System.out.println("Regla 45: factor ::= CONST_FLOAT."); :}
-  | CONST_INT {: System.out.println("Regla 46: factor ::= CONST_INT."); :}
-  | position {: System.out.println("Regla 47: factor ::= position."); :}
-  | PAR_ABRE expresion PAR_CIERRA {: System.out.println("Regla 48: factor ::= PAR_ABRE expresion PAR_CIERRA."); :}
+  ID_VAR:id {:
+    anuncio("Regla 46: factor ::= ID_VAR(" + id + ").");
+    verificarTipo((String) id);
+  :}
+  | CONST_FLOAT:constante {: anuncio("Regla 47: factor ::= CONST_FLOAT(" + constante + ")."); :}
+  | CONST_INT:constante {: anuncio("Regla 48: factor ::= CONST_INT(" + constante + ")."); :}
+  | position {: anuncio("Regla 49: factor ::= position."); :}
+  | PAR_ABRE expresion PAR_CIERRA {: anuncio("Regla 50: factor ::= PAR_ABRE expresion PAR_CIERRA."); :}
 ;
 
 position ::=
-  POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE lista_enteros COR_CIERRA PAR_CIERRA {: System.out.println("Regla 49: position ::= POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE lista_enteros COR_CIERRA PAR_CIERRA."); :}
-  | POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA {: System.out.println("Regla 50: position ::= POSITION PAR_ABRE CONST_INT PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA."); :}
+  POSITION PAR_ABRE CONST_INT:constante PUNTO_COMA COR_ABRE lista_enteros COR_CIERRA PAR_CIERRA {: anuncio("Regla 51: position ::= POSITION PAR_ABRE CONST_INT(" + constante + ") PUNTO_COMA COR_ABRE lista_enteros COR_CIERRA PAR_CIERRA."); :}
+  | POSITION PAR_ABRE CONST_INT:constante PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA {: anuncio("Regla 52: position ::= POSITION PAR_ABRE CONST_INT(" + constante + ") PUNTO_COMA COR_ABRE COR_CIERRA PAR_CIERRA."); :}
 ;
 
 lista_enteros ::=
-  CONST_INT mas_enteros {: System.out.println("Regla 51: lista_enteros ::= CONST_INT mas_enteros."); :}
-  | CONST_INT {: System.out.println("Regla 52: lista_enteros ::= CONST_INT."); :}
+  CONST_INT:constante mas_enteros {: anuncio("Regla 53: lista_enteros ::= CONST_INT(" + constante + ") mas_enteros."); :}
+  | CONST_INT:constante {: anuncio("Regla 54: lista_enteros ::= CONST_INT(" + constante + ")."); :}
 ;
 
 mas_enteros ::=
-  COMA CONST_INT mas_enteros {: System.out.println("Regla 53: mas_enteros ::= COMA CONST_INT mas_enteros."); :}
-  | COMA CONST_INT {: System.out.println("Regla 54: mas_enteros ::= COMA CONST_INT."); :}
+  COMA CONST_INT:constante mas_enteros {: anuncio("Regla 55: mas_enteros ::= COMA CONST_INT(" + constante + ") mas_enteros."); :}
+  | COMA CONST_INT:constante {: anuncio("Regla 56: mas_enteros ::= COMA CONST_INT(" + constante + ")."); :}
 ;

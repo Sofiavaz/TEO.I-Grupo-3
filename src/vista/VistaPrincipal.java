@@ -1,10 +1,14 @@
 package vista;
 
 import modelo.Lexico;
+import modelo.Tabla;
 import modelo.Token;
 import modelo.parser;
 
 import javax.swing.*;
+
+import jflex.core.sym;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +18,7 @@ import java.io.StringReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Vista extends JFrame {
+public class VistaPrincipal extends JFrame {
     private JTextArea textoSalida, editor;
     private JTextField textoUrl;
     private JButton botonCargar, botonAnalizar, botonMostrarTabla;
@@ -22,9 +26,10 @@ public class Vista extends JFrame {
     private JScrollPane scrollerSalida, scrollerEditor;
     private JPanel panelFlow, panelArriba, panelMedio, panelAbajo, panelPrincipal;
     private JFrame vistaTabla;
-    Lexico lexer;
+    private Lexico lexer;
+    private Tabla tablaDeSimbolos;
 
-    public Vista(String nombre) {
+    public VistaPrincipal(String nombre) {
     	super(nombre);
     	
     	// Panel de arriba.
@@ -93,17 +98,10 @@ public class Vista extends JFrame {
         centrarVentana();
     }
     
-    public void agregarLinea(String linea){
-        textoSalida.append(linea+'\n');
-    }
-    
-    public void limpiarSalida() {
-    	textoSalida.setText("");
-    }
-
     private void cargarArchivo() {
         if(!textoUrl.getText().isEmpty()) {
-    	
+            textoSalida.setText("");
+            
 	    	FileReader reader;
 	        editor.setText("");
 	        try {
@@ -112,7 +110,6 @@ public class Vista extends JFrame {
 	            editor.read(reader, null);
 	            
 	        } catch (FileNotFoundException e) {
-	            textoSalida.setText("");
 	        	agregarLinea("Archivo no encontrado");
 	        } catch (IOException e) {
 	            e.printStackTrace();
@@ -127,26 +124,46 @@ public class Vista extends JFrame {
         	StringReader reader = new StringReader(editor.getText()); 
 	        textoSalida.setText("");
         	
-            // Realiza el análisis lexicográfico.
+            /* Realiza el análisis lexicográfico. */
             lexer = new Lexico(reader);
             lexer.agregarVista(this);
             
-            @SuppressWarnings("deprecation")
-			parser miParser = new parser(lexer);
             try {
-				miParser.parse();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-            
-            /*
-            try {
-				lexer.next_token();
+            	textoSalida.append("Comienzo de análisis lexicográfico.\n\n");
+            	
+            	int eof = -1;
+            	while (eof != 0) {
+            		eof = lexer.next_token().sym;
+            	}
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-			*/
+            
+            // Crea la tabla de símbolos, y finaliza el proceso de análisis.
+            tablaDeSimbolos = new Tabla(lexer.getListaTokens());
+            reader.close();
+            textoSalida.append("Análisis lexicográfico OK.\n\n");
+            
+            
+            /* Realiza el análisis sintáctico. */
+            reader = new StringReader(editor.getText());
+            lexer = new Lexico(reader);
+            @SuppressWarnings("deprecation")
+			parser miParser = new parser(lexer);
+            miParser.agregarVista(this);
+            miParser.vincularTabla(tablaDeSimbolos);
+            
+            try {
+            	textoSalida.append("Comienzo de análisis sintáctico.\n\n");
+            	
+				miParser.parse();
+				
+				textoSalida.append("\n\nAnálisis sintáctico OK.\n\n");
+			} catch (Exception e) {
+				textoSalida.append(e.getMessage());
+				e.printStackTrace();
+			}
         }
     }
     
@@ -154,8 +171,7 @@ public class Vista extends JFrame {
     	if(lexer != null) {
 	    	javax.swing.SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
-		            ArrayList<Token> listaTokens = lexer.getListaTokens();
-	            	vistaTabla = new Tabla(listaTokens);
+	            	vistaTabla = new VistaTabla(tablaDeSimbolos);
 	            }
 	        });
     	}
@@ -166,5 +182,17 @@ public class Vista extends JFrame {
         int x = (int) ((dimension.getWidth() - this.getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - this.getHeight()) / 2);
         this.setLocation(x, y);
+    }
+    
+    public void agregarLinea(String linea){
+        textoSalida.append(linea+'\n');
+    }
+    
+    public void limpiarSalida() {
+    	textoSalida.setText("");
+    }
+    
+    public Tabla getTablaDeSimbolos() {
+    	return tablaDeSimbolos;
     }
 }
