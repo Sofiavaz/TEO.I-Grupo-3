@@ -1,0 +1,18 @@
+Nombre      Token  TipoValor       Longitud
+_indice    ID_VARint-               -       
+_posicionID_VARint-               -       
+_0              CONST_INT-    0               -       
+_Dentro_del_whileCONST_STR-    Dentro del while16     
+_1              CONST_INT-    1               -       
+_5              CONST_INT-    5               -       
+_2              CONST_INT-    2               -       
+_3              CONST_INT-    3               -       
+_Posición:_CONST_STR-    Posición: 10     
+_numeroRealID_VARError-               -       
+_5.2e10    CONST_FLOAT-    5.2e10     -       
+_numero    ID_VARError-               -       
+_5.2e5      CONST_FLOAT-    5.2e5       -       
+_Primero.CONST_STR-    Primero. 8       
+_2.3          CONST_FLOAT-    2.3           -       
+_Segundo.CONST_STR-    Segundo. 8       
+_Tercero.CONST_STR-    Tercero. 8       
