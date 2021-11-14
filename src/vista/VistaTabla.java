@@ -71,22 +71,22 @@ public class VistaTabla extends JFrame {
             maxToken++;
             maxTipo++;
             maxValor++;
-            myWriter.write(String.format("%-" + (maxNombre - tablaDeSimbolos.getColumnas()[0].length()) + "s", tablaDeSimbolos.getColumnas()[0]));
-            myWriter.append(String.format("%-" + (maxToken - tablaDeSimbolos.getColumnas()[1].length()) + "s", tablaDeSimbolos.getColumnas()[1]));
-            myWriter.append(String.format("%-" + (maxTipo - tablaDeSimbolos.getColumnas()[2].length()) + "s", tablaDeSimbolos.getColumnas()[2]));
-            myWriter.append(String.format("%-" + (maxValor - tablaDeSimbolos.getColumnas()[3].length()) + "s", tablaDeSimbolos.getColumnas()[3]));
-            myWriter.append(String.format("%-" + (maxLongitud - tablaDeSimbolos.getColumnas()[4].length()) + "s", tablaDeSimbolos.getColumnas()[4]));
+            myWriter.write(String.format("|%-" + maxNombre  + "s", tablaDeSimbolos.getColumnas()[0]));
+            myWriter.append(String.format("|%-" + maxToken  + "s", tablaDeSimbolos.getColumnas()[1]));
+            myWriter.append(String.format("|%-" + maxTipo  + "s", tablaDeSimbolos.getColumnas()[2]));
+            myWriter.append(String.format("|%-" + maxValor  + "s", tablaDeSimbolos.getColumnas()[3]));
+            myWriter.append(String.format("|%-" + maxLongitud  + "s|", tablaDeSimbolos.getColumnas()[4]));
             myWriter.append("\n");
             for (int i = 0; i < registros.length; i++) {
-                myWriter.append(String.format("%-" + (maxNombre - registros[i][0].length()) + "s", registros[i][0]));
-                myWriter.append(String.format("%-" + (maxToken - registros[i][1].length()) + "s", registros[i][1]));
-                myWriter.append(String.format("%-" + (maxTipo - registros[i][2].length()) + "s", registros[i][2]));
-                myWriter.append(String.format("%-" + (maxValor - registros[i][3].length()) + "s", registros[i][3]));
-                myWriter.append(String.format("%-" + (maxLongitud - registros[i][4].length()) + "s", registros[i][4]));
+                myWriter.append(String.format("|%-"+ maxNombre + "s", registros[i][0]));
+                myWriter.append(String.format("|%-"+ maxToken + "s", registros[i][1]));
+                myWriter.append(String.format("|%-"+ maxTipo + "s", registros[i][2]));
+                myWriter.append(String.format("|%-" +maxValor  + "s", registros[i][3]));
+                myWriter.append(String.format("|%-" +maxLongitud+ "s|", registros[i][4]));
                 myWriter.append("\n");
             }
-
             myWriter.close();
+            JOptionPane.showMessageDialog(null, "Se genero el archivo ts.txt correctamente", "Generacion OK ", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
