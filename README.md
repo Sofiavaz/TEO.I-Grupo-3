@@ -2,7 +2,6 @@
 ## Integrantes
 + Iarza Esteban
 + Laffont Facundo
-+ Nocella Yatel
 + Schuckmann Walter
 + Vazquez Sofía
 ## Funcionamiento
